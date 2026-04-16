@@ -12,14 +12,16 @@ export function PathChain({ path, currentIndex, found, targetTitle }: Props) {
   if (path.length === 0) return null
   return (
     <div className="relative">
-      <div className="flex flex-nowrap items-stretch">
-
+      <div className="flex flex-col items-center sm:flex-row sm:flex-nowrap sm:items-stretch">
         {path.map((step, i) => {
           const isStart = i === 0
           const isCurrent = i === currentIndex && !found
           const isGoal = found && i === path.length - 1
           return (
-            <div key={`${step.title}-${i}`} className="flex items-stretch">
+            <div
+              key={`${step.title}-${i}`}
+              className="flex w-full flex-col items-center sm:w-auto sm:flex-row sm:items-stretch"
+            >
               <NodeCard
                 step={step}
                 isStart={isStart}
@@ -66,7 +68,7 @@ function NodeCard({
 
   return (
     <article
-      className={`relative flex w-[260px] shrink-0 flex-col gap-2 rounded-xl border p-3.5 shadow-lg backdrop-blur-sm transition-all ${tone}`}
+      className={`relative flex w-full max-w-sm shrink-0 flex-col gap-2 rounded-xl border p-3.5 shadow-lg backdrop-blur-sm transition-all sm:w-[260px] sm:max-w-none ${tone}`}
     >
       <div className="flex items-center justify-between">
         <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider ${badgeTone}`}>
@@ -110,15 +112,30 @@ function NodeCard({
 
 function Arrow() {
   return (
-    <div className="flex items-center self-stretch px-2" aria-hidden="true">
-      <svg width="34" height="18" viewBox="0 0 34 18" fill="none">
+    <div
+      className="flex items-center justify-center py-2 sm:self-stretch sm:px-2 sm:py-0"
+      aria-hidden="true"
+    >
+      {/* Vertical arrow (mobile) */}
+      <svg width="18" height="34" viewBox="0 0 18 34" fill="none" className="sm:hidden">
         <defs>
-          <linearGradient id="arrowGrad" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id="arrowGradV" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#334155" />
             <stop offset="100%" stopColor="#7dd3fc" />
           </linearGradient>
         </defs>
-        <line x1="2" y1="9" x2="28" y2="9" stroke="url(#arrowGrad)" strokeWidth="2" />
+        <line x1="9" y1="2" x2="9" y2="28" stroke="url(#arrowGradV)" strokeWidth="2" />
+        <path d="M4 24 L9 32 L14 24" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {/* Horizontal arrow (desktop) */}
+      <svg width="34" height="18" viewBox="0 0 34 18" fill="none" className="hidden sm:block">
+        <defs>
+          <linearGradient id="arrowGradH" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#334155" />
+            <stop offset="100%" stopColor="#7dd3fc" />
+          </linearGradient>
+        </defs>
+        <line x1="2" y1="9" x2="28" y2="9" stroke="url(#arrowGradH)" strokeWidth="2" />
         <path d="M24 4 L32 9 L24 14" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
