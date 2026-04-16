@@ -18,30 +18,8 @@ export function Autocomplete({ id, label, placeholder, value, onChange, onSelect
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const debounceRef = useRef<number | null>(null)
 
-  useEffect(() => {
-    if (!value.trim() || value.length < 2) {
-      setSuggestions([])
-      setOpen(false)
-      return
-    }
-    if (debounceRef.current) window.clearTimeout(debounceRef.current)
-    debounceRef.current = window.setTimeout(() => {
-      abortRef.current?.abort()
-      const c = new AbortController()
-      abortRef.current = c
-      opensearch(value, c.signal)
-        .then((s) => {
-          setSuggestions(s)
-          setOpen(s.length > 0)
-          setHighlight(0)
-        })
-        .catch(() => {})
-    }, 220)
-    return () => {
-      if (debounceRef.current) window.clearTimeout(debounceRef.current)
-    }
-  }, [value])
-
+  // Click-outside closes the dropdown. This is the legitimate kind of effect:
+  // subscribing to an external system, not a data-fetch driven by props.
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false)
@@ -50,10 +28,41 @@ export function Autocomplete({ id, label, placeholder, value, onChange, onSelect
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
+  // Drive the search directly from the input event instead of an effect on
+  // `value`. The previous effect re-ran whenever the parent updated `value`
+  // (including right after a selection), which caused the dropdown to
+  // resurrect itself after the user picked a suggestion.
+  const handleInput = (next: string) => {
+    onChange(next)
+    abortRef.current?.abort()
+    if (debounceRef.current) window.clearTimeout(debounceRef.current)
+
+    if (!next.trim() || next.length < 2) {
+      setSuggestions([])
+      setOpen(false)
+      return
+    }
+
+    debounceRef.current = window.setTimeout(() => {
+      const c = new AbortController()
+      abortRef.current = c
+      opensearch(next, c.signal)
+        .then((s) => {
+          setSuggestions(s)
+          setOpen(s.length > 0)
+          setHighlight(0)
+        })
+        .catch(() => {})
+    }, 220)
+  }
+
   const select = (s: Suggestion) => {
+    abortRef.current?.abort()
+    if (debounceRef.current) window.clearTimeout(debounceRef.current)
+    setSuggestions([])
+    setOpen(false)
     onChange(s.title)
     onSelect?.(s)
-    setOpen(false)
   }
 
   return (
@@ -68,7 +77,7 @@ export function Autocomplete({ id, label, placeholder, value, onChange, onSelect
         spellCheck={false}
         value={value}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => handleInput(e.target.value)}
         onFocus={() => suggestions.length > 0 && setOpen(true)}
         onKeyDown={(e) => {
           if (!open) return
