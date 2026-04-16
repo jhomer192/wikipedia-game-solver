@@ -12,7 +12,8 @@ export function PathChain({ path, currentIndex, found, targetTitle }: Props) {
   if (path.length === 0) return null
   return (
     <div className="relative">
-      <div className="flex flex-wrap items-stretch gap-y-6">
+      <div className="flex flex-nowrap items-stretch">
+
         {path.map((step, i) => {
           const isStart = i === 0
           const isCurrent = i === currentIndex && !found
