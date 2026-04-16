@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterAll } from 'vitest'
+import { writeFileSync, mkdirSync } from 'node:fs'
 import { solve, type VisitedStep } from '../solver'
 
 interface CaseResult {
@@ -70,52 +71,59 @@ async function runCase(name: string, start: string, end: string): Promise<CaseRe
   }
 }
 
+function renderSummary(rs: CaseResult[]): string {
+  const pass = rs.filter((r) => r.found).length
+  const lines = [
+    '═══════════════════════════════════════════════════════════════════════════',
+    `Wikipedia Solver e2e summary — ${pass}/${rs.length} passed`,
+    '═══════════════════════════════════════════════════════════════════════════',
+  ]
+  for (const r of rs) {
+    lines.push(
+      `  ${r.found ? '✓' : '✗'}  ${r.name.padEnd(48)}  ` +
+        `hops=${String(r.hops).padStart(2)}  ` +
+        `time=${(r.elapsedMs / 1000).toFixed(1).padStart(5)}s  ` +
+        `api=${String(r.apiCalls).padStart(3)}  ` +
+        `scored=${String(r.candidatesScored).padStart(4)}`,
+    )
+    lines.push(`      path:  ${r.path.join(' → ')}`)
+    if (r.stuckReason) lines.push(`      stuck: ${r.stuckReason}`)
+  }
+  const totalTime = rs.reduce((a, b) => a + b.elapsedMs, 0) / 1000
+  const totalApi = rs.reduce((a, b) => a + b.apiCalls, 0)
+  const totalScored = rs.reduce((a, b) => a + b.candidatesScored, 0)
+  lines.push(
+    '───────────────────────────────────────────────────────────────────────────',
+    `  totals:  time=${totalTime.toFixed(1)}s  api=${totalApi}  scored=${totalScored}`,
+    '═══════════════════════════════════════════════════════════════════════════',
+  )
+  return lines.join('\n')
+}
+
 describe.sequential('solver e2e (live Wikipedia API)', () => {
   for (const tc of CASES) {
     it(tc.name, async () => {
       const r = await runCase(tc.name, tc.start, tc.end)
       results.push(r)
-
-      // Always log for the report
       const tag = r.found ? 'PASS' : 'FAIL'
       console.log(
         `  [${tag}] ${r.name}  hops=${r.hops}  time=${(r.elapsedMs / 1000).toFixed(1)}s  ` +
-          `api=${r.apiCalls}  scored=${r.candidatesScored}  path=${r.path.join(' → ')}` +
+          `api=${r.apiCalls}  path=${r.path.join(' → ')}` +
           (r.stuckReason ? `  stuck: ${r.stuckReason}` : ''),
       )
-
       expect(r.found, `stuck: ${r.stuckReason ?? 'unknown'}`).toBe(true)
       expect(r.hops, 'exceeded max hops').toBeLessThanOrEqual(MAX_HOPS)
     })
   }
 
-  it('summary table', () => {
-    const pass = results.filter((r) => r.found).length
-    const lines = [
-      '',
-      '═══════════════════════════════════════════════════════════════════════════',
-      `Wikipedia Solver e2e summary — ${pass}/${results.length} passed`,
-      '═══════════════════════════════════════════════════════════════════════════',
-    ]
-    for (const r of results) {
-      lines.push(
-        `  ${r.found ? '✓' : '✗'}  ${r.name.padEnd(48)}  ` +
-          `hops=${String(r.hops).padStart(2)}  ` +
-          `time=${(r.elapsedMs / 1000).toFixed(1).padStart(5)}s  ` +
-          `api=${String(r.apiCalls).padStart(3)}  ` +
-          `scored=${String(r.candidatesScored).padStart(4)}`,
-      )
+  afterAll(() => {
+    const summary = renderSummary(results)
+    console.log('\n' + summary)
+    try {
+      mkdirSync('.algo-results', { recursive: true })
+      writeFileSync('.algo-results/latest.txt', summary + '\n')
+    } catch {
+      // best-effort
     }
-    const totalTime = results.reduce((a, b) => a + b.elapsedMs, 0) / 1000
-    const totalApi = results.reduce((a, b) => a + b.apiCalls, 0)
-    const totalScored = results.reduce((a, b) => a + b.candidatesScored, 0)
-    lines.push(
-      '───────────────────────────────────────────────────────────────────────────',
-      `  totals:                                          ` +
-        `       time=${totalTime.toFixed(1)}s  api=${totalApi}  scored=${totalScored}`,
-      '═══════════════════════════════════════════════════════════════════════════',
-    )
-    console.log(lines.join('\n'))
-    expect(true).toBe(true)
   })
 })
