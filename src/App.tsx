@@ -150,17 +150,6 @@ export default function App() {
               .
             </p>
           </div>
-          <a
-            href="https://github.com/jhomer192/wikipedia-game-solver"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-900/70 px-3 py-1.5 text-xs font-medium text-slate-300 hover:border-accent-500/60 hover:text-accent-400"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 .5C5.73.5.75 5.48.75 11.75c0 4.98 3.23 9.2 7.71 10.7.56.1.76-.24.76-.54v-2.1c-3.14.68-3.8-1.35-3.8-1.35-.52-1.3-1.27-1.65-1.27-1.65-1.04-.71.08-.69.08-.69 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.68 1.25 3.34.96.1-.75.4-1.25.73-1.54-2.5-.29-5.14-1.25-5.14-5.57 0-1.23.44-2.23 1.16-3.02-.12-.28-.5-1.42.11-2.97 0 0 .95-.3 3.1 1.15a10.8 10.8 0 0 1 5.63 0c2.15-1.45 3.1-1.15 3.1-1.15.61 1.55.23 2.69.11 2.97.72.79 1.16 1.79 1.16 3.02 0 4.33-2.64 5.28-5.16 5.56.41.35.77 1.03.77 2.08v3.08c0 .3.2.65.77.54 4.48-1.5 7.7-5.72 7.7-10.7C23.25 5.48 18.27.5 12 .5z" />
-            </svg>
-            GitHub
-          </a>
         </div>
       </header>
 
@@ -280,24 +269,14 @@ export default function App() {
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">
           At every step the solver grabs the current article&apos;s outgoing links, fetches a short
           intro extract for each candidate (batched via MediaWiki&apos;s <code className="text-slate-300">prop=extracts</code>),
-          and builds Term Frequency – Inverse Document Frequency (TF-IDF) vectors from the
-          candidate intros plus the target&apos;s intro. It scores each candidate by cosine
-          similarity to the target and greedily walks to the best unvisited one. Adapted from an
-          old personal Python project.
+          and builds TF-IDF vectors from the candidate intros plus the target&apos;s intro. It
+          scores each candidate by cosine similarity to the target and greedily walks to the best
+          unvisited one. Ported from an old personal Python project.
         </p>
       </section>
 
       <footer className="mt-2 text-center text-xs text-slate-500">
-        Built by{' '}
-        <a
-          href="https://github.com/jhomer192"
-          className="text-accent-400 hover:underline"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Jack Homer
-        </a>{' '}
-        · data from the public MediaWiki API · no backend, no key
+        Built by Jack Homer · data from the public MediaWiki API · no backend, no key
       </footer>
     </div>
   )
