@@ -32,7 +32,7 @@ export interface SolverOptions {
 export async function* solve(
   opts: SolverOptions,
 ): AsyncGenerator<SolverEvent, void, undefined> {
-  const { start, end, maxHops = 25, maxCandidatesPerStep = 40, signal } = opts
+  const { start, end, maxHops = 50, maxCandidatesPerStep = 40, signal } = opts
 
   let apiCalls = 0
   let candidatesScored = 0
