@@ -10,18 +10,25 @@ interface Props {
 
 export function PathChain({ path, currentIndex, found, targetTitle }: Props) {
   if (path.length === 0) return null
+
+  // Group path indices into rows of 3 for desktop
+  const rows: number[][] = []
+  for (let i = 0; i < path.length; i += 3) {
+    const row: number[] = []
+    for (let j = i; j < i + 3 && j < path.length; j++) row.push(j)
+    rows.push(row)
+  }
+
   return (
     <div className="relative">
-      <div className="flex flex-col items-center sm:flex-row sm:flex-nowrap sm:items-stretch">
+      {/* Mobile: flat vertical list */}
+      <div className="flex flex-col items-center sm:hidden">
         {path.map((step, i) => {
           const isStart = i === 0
           const isCurrent = i === currentIndex && !found
           const isGoal = found && i === path.length - 1
           return (
-            <div
-              key={`${step.title}-${i}`}
-              className="flex w-full flex-col items-center sm:w-auto sm:flex-row sm:items-stretch"
-            >
+            <div key={`${step.title}-${i}`} className="flex w-full flex-col items-center">
               <NodeCard
                 step={step}
                 isStart={isStart}
@@ -33,6 +40,39 @@ export function PathChain({ path, currentIndex, found, targetTitle }: Props) {
             </div>
           )
         })}
+      </div>
+
+      {/* Desktop: 3-per-row grid, each row is a horizontal flex */}
+      <div className="hidden sm:flex sm:flex-col sm:items-start sm:gap-4">
+        {rows.map((rowIndices, rowIdx) => (
+          <div key={rowIdx} className="flex flex-row items-stretch">
+            {rowIndices.map((i, posInRow) => {
+              const step = path[i]
+              const isStart = i === 0
+              const isCurrent = i === currentIndex && !found
+              const isGoal = found && i === path.length - 1
+              const isLastInPath = i === path.length - 1
+              const isLastInRow = posInRow === rowIndices.length - 1
+              return (
+                <div key={`${step.title}-${i}`} className="flex flex-row items-stretch">
+                  <NodeCard
+                    step={step}
+                    isStart={isStart}
+                    isCurrent={isCurrent}
+                    isGoal={isGoal}
+                    target={targetTitle}
+                  />
+                  {/* Arrow after node: show between nodes in same row, suppress after last node */}
+                  {!isLastInPath && !isLastInRow && <Arrow horizontal />}
+                  {/* Down-arrow at end of a full row (not the final row) */}
+                  {!isLastInPath && isLastInRow && rowIndices.length === 3 && (
+                    <DownArrow />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -110,14 +150,28 @@ function NodeCard({
   )
 }
 
-function Arrow() {
+function Arrow({ horizontal = false }: { horizontal?: boolean }) {
+  if (horizontal) {
+    // Desktop horizontal arrow (used inside desktop rows)
+    return (
+      <div className="flex items-center justify-center self-stretch px-2" aria-hidden="true">
+        <svg width="34" height="18" viewBox="0 0 34 18" fill="none">
+          <defs>
+            <linearGradient id="arrowGradH" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#334155" />
+              <stop offset="100%" stopColor="#7dd3fc" />
+            </linearGradient>
+          </defs>
+          <line x1="2" y1="9" x2="28" y2="9" stroke="url(#arrowGradH)" strokeWidth="2" />
+          <path d="M24 4 L32 9 L24 14" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+    )
+  }
+  // Mobile vertical arrow
   return (
-    <div
-      className="flex items-center justify-center py-2 sm:self-stretch sm:px-2 sm:py-0"
-      aria-hidden="true"
-    >
-      {/* Vertical arrow (mobile) */}
-      <svg width="18" height="34" viewBox="0 0 18 34" fill="none" className="sm:hidden">
+    <div className="flex items-center justify-center py-2" aria-hidden="true">
+      <svg width="18" height="34" viewBox="0 0 18 34" fill="none">
         <defs>
           <linearGradient id="arrowGradV" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#334155" />
@@ -127,16 +181,22 @@ function Arrow() {
         <line x1="9" y1="2" x2="9" y2="28" stroke="url(#arrowGradV)" strokeWidth="2" />
         <path d="M4 24 L9 32 L14 24" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      {/* Horizontal arrow (desktop) */}
-      <svg width="34" height="18" viewBox="0 0 34 18" fill="none" className="hidden sm:block">
+    </div>
+  )
+}
+
+function DownArrow() {
+  return (
+    <div className="flex items-center justify-center self-stretch px-2" aria-hidden="true">
+      <svg width="18" height="34" viewBox="0 0 18 34" fill="none">
         <defs>
-          <linearGradient id="arrowGradH" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id="arrowGradDown" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#334155" />
             <stop offset="100%" stopColor="#7dd3fc" />
           </linearGradient>
         </defs>
-        <line x1="2" y1="9" x2="28" y2="9" stroke="url(#arrowGradH)" strokeWidth="2" />
-        <path d="M24 4 L32 9 L24 14" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="9" y1="2" x2="9" y2="28" stroke="url(#arrowGradDown)" strokeWidth="2" />
+        <path d="M4 24 L9 32 L14 24" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   )
