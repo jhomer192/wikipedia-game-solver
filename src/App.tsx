@@ -39,6 +39,7 @@ export default function App() {
   const startTsRef = useRef(0)
   const tickTimerRef = useRef<number | null>(null)
   const hasRunRef = useRef(false)
+  const lastAttemptRef = useRef<VisitedStep[]>([])
 
   const startElapsed = () => {
     hasRunRef.current = true
@@ -114,9 +115,17 @@ export default function App() {
           ])
         } else if (ev.type === 'stuck') {
           setError(ev.reason)
+          setStatus('')
+          setPath((p) => {
+            const best = p.length > 0 ? p : lastAttemptRef.current
+            return best
+          })
           setLog((l) => [...l, { time: performance.now(), message: ev.reason, kind: 'warn' }])
         } else if (ev.type === 'restart') {
-          setPath([])
+          setPath((p) => {
+            lastAttemptRef.current = p
+            return []
+          })
           const msg = `Retrying from "${start.trim()}" with a different route (attempt ${ev.attempt + 1})`
           setStatus(msg)
           setLog((l) => [...l, { time: performance.now(), message: msg, kind: 'warn' }])
