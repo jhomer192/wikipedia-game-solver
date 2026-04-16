@@ -24,6 +24,7 @@ const CASES: { name: string; start: string; end: string }[] = [
   { name: '05 Taylor Swift → World War II', start: 'Taylor Swift', end: 'World War II' },
   { name: '06 Photosynthesis → SpaceX', start: 'Photosynthesis', end: 'SpaceX' },
   { name: '07 Dog → Albert Einstein', start: 'Dog', end: 'Albert Einstein' },
+  { name: '08 Mike Homer → Charles VIII of France', start: 'Mike Homer', end: 'Charles VIII of France' },
 ]
 
 const MAX_HOPS = 15
