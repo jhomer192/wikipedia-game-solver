@@ -146,10 +146,14 @@ export default function App() {
   }, [start, end])
 
   const pickRandom = async (which: 'start' | 'end') => {
-    const title = await getRandomArticle()
-    if (title) {
-      if (which === 'start') setStart(title)
-      else setEnd(title)
+    try {
+      const title = await getRandomArticle()
+      if (title) {
+        if (which === 'start') setStart(title)
+        else setEnd(title)
+      }
+    } catch {
+      // network error — user can click again
     }
   }
 
