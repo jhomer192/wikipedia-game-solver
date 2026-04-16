@@ -102,6 +102,11 @@ export default function App() {
         } else if (ev.type === 'stuck') {
           setError(ev.reason)
           setLog((l) => [...l, { time: performance.now(), message: ev.reason, kind: 'warn' }])
+        } else if (ev.type === 'restart') {
+          setPath([])
+          const msg = `Retrying from "${start.trim()}" with a different route (attempt ${ev.attempt + 1})`
+          setStatus(msg)
+          setLog((l) => [...l, { time: performance.now(), message: msg, kind: 'warn' }])
         } else if (ev.type === 'stats') {
           setApiCalls(ev.apiCalls)
           setCandidatesScored(ev.candidatesScored)

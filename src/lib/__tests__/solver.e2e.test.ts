@@ -8,6 +8,7 @@ interface CaseResult {
   end: string
   found: boolean
   hops: number
+  attempts: number
   elapsedMs: number
   apiCalls: number
   candidatesScored: number
@@ -32,8 +33,9 @@ const results: CaseResult[] = []
 
 async function runCase(name: string, start: string, end: string): Promise<CaseResult> {
   const t0 = Date.now()
-  const path: VisitedStep[] = []
+  let path: VisitedStep[] = []
   let found = false
+  let attempts = 1
   let apiCalls = 0
   let candidatesScored = 0
   let stuckReason: string | undefined
@@ -48,7 +50,12 @@ async function runCase(name: string, start: string, end: string): Promise<CaseRe
         path.push(ev.step)
         found = true
       } else if (ev.type === 'stuck') stuckReason = ev.reason
-      else if (ev.type === 'stats') {
+      else if (ev.type === 'restart') {
+        // Count only the winning attempt's hops — reset the path when the
+        // solver backs up to start with an accumulated visited set.
+        path = []
+        attempts = ev.attempt + 1
+      } else if (ev.type === 'stats') {
         apiCalls = ev.apiCalls
         candidatesScored = ev.candidatesScored
       }
@@ -62,7 +69,8 @@ async function runCase(name: string, start: string, end: string): Promise<CaseRe
     start,
     end,
     found,
-    hops: path.length - 1,
+    hops: Math.max(path.length - 1, 0),
+    attempts,
     elapsedMs: Date.now() - t0,
     apiCalls,
     candidatesScored,
@@ -82,6 +90,7 @@ function renderSummary(rs: CaseResult[]): string {
     lines.push(
       `  ${r.found ? '✓' : '✗'}  ${r.name.padEnd(48)}  ` +
         `hops=${String(r.hops).padStart(2)}  ` +
+        `attempts=${r.attempts}  ` +
         `time=${(r.elapsedMs / 1000).toFixed(1).padStart(5)}s  ` +
         `api=${String(r.apiCalls).padStart(3)}  ` +
         `scored=${String(r.candidatesScored).padStart(4)}`,
@@ -107,8 +116,9 @@ describe.sequential('solver e2e (live Wikipedia API)', () => {
       results.push(r)
       const tag = r.found ? 'PASS' : 'FAIL'
       console.log(
-        `  [${tag}] ${r.name}  hops=${r.hops}  time=${(r.elapsedMs / 1000).toFixed(1)}s  ` +
-          `api=${r.apiCalls}  path=${r.path.join(' → ')}` +
+        `  [${tag}] ${r.name}  hops=${r.hops}  attempts=${r.attempts}  ` +
+          `time=${(r.elapsedMs / 1000).toFixed(1)}s  api=${r.apiCalls}  ` +
+          `path=${r.path.join(' → ')}` +
           (r.stuckReason ? `  stuck: ${r.stuckReason}` : ''),
       )
       expect(r.found, `stuck: ${r.stuckReason ?? 'unknown'}`).toBe(true)
