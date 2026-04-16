@@ -215,11 +215,13 @@ export default function App() {
       {rateLimited && (
         <div className="flex items-start justify-between gap-3 rounded-xl border border-amber-700/50 bg-amber-900/30 px-4 py-3 text-sm text-amber-200">
           <div>
-            <p className="font-semibold">Wikipedia is rate-limiting this session</p>
+            <p className="font-semibold">Wikipedia rate-limited us. Come back later.</p>
             <p className="mt-0.5 text-amber-300/80">
-              The API returned HTTP 429. The solver may stall or fail until the limit clears.
-              {rateLimited.retryAfter != null && (
-                <> Retry in ~{rateLimited.retryAfter}s.</>
+              Wikipedia temporarily blocked this browser from making more API requests.
+              {rateLimited.retryAfter != null ? (
+                <> Try again in ~{rateLimited.retryAfter}s.</>
+              ) : (
+                <> Try again in a minute or two.</>
               )}
             </p>
           </div>
