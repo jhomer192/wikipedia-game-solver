@@ -4,6 +4,16 @@ import { PathChain } from './components/PathChain'
 import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
 import { getRandomArticle } from './lib/wiki'
 
+function formatElapsed(seconds: number, hasRun: boolean): string {
+  if (!hasRun) return '—'
+  if (seconds >= 60) {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${String(Math.floor(s)).padStart(2, '0')}.${Math.floor((s % 1) * 10)}`
+  }
+  return `${seconds.toFixed(1)} s`
+}
+
 interface LogEntry {
   time: number
   message: string
@@ -28,8 +38,10 @@ export default function App() {
   const abortRef = useRef<AbortController | null>(null)
   const startTsRef = useRef(0)
   const tickTimerRef = useRef<number | null>(null)
+  const hasRunRef = useRef(false)
 
   const startElapsed = () => {
+    hasRunRef.current = true
     startTsRef.current = performance.now()
     setElapsed(0)
     if (tickTimerRef.current) window.clearInterval(tickTimerRef.current)
@@ -232,11 +244,20 @@ export default function App() {
             </button>
           )}
 
+          <div
+            className={`flex min-w-[6rem] items-center justify-center rounded-lg border px-3 py-1.5 font-mono text-2xl font-semibold tabular-nums tracking-tight ${
+              running
+                ? 'border-accent-500/40 bg-accent-500/10 text-accent-300'
+                : 'border-ink-700 bg-ink-800 text-slate-300'
+            }`}
+          >
+            {formatElapsed(elapsed, hasRunRef.current)}
+          </div>
+
           <div className="ml-auto grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-400 sm:flex sm:flex-wrap sm:items-center">
             <Stat label="Hops" value={Math.max(0, path.length - 1).toString()} />
             <Stat label="API calls" value={apiCalls.toString()} />
             <Stat label="Scored" value={candidatesScored.toString()} />
-            <Stat label="Elapsed" value={`${elapsed.toFixed(1)}s`} />
           </div>
         </div>
 
