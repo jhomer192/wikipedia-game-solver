@@ -24,6 +24,7 @@ interface LogEntry {
 export default function App() {
   const [start, setStart] = useState('Dog')
   const [end, setEnd] = useState('Albert Einstein')
+  const [maxAttempts, setMaxAttempts] = useState(3)
   const [running, setRunning] = useState(false)
   const [path, setPath] = useState<VisitedStep[]>([])
   const [found, setFound] = useState(false)
@@ -89,7 +90,7 @@ export default function App() {
     abortRef.current = c
 
     try {
-      for await (const ev of solve({ start: start.trim(), end: end.trim(), signal: c.signal })) {
+      for await (const ev of solve({ start: start.trim(), end: end.trim(), maxAttempts, signal: c.signal })) {
         if (c.signal.aborted) break
         if (ev.type === 'status') {
           setStatus(ev.message)
@@ -143,7 +144,7 @@ export default function App() {
       setRunning(false)
       stopElapsed()
     }
-  }, [start, end])
+  }, [start, end, maxAttempts])
 
   const pickRandom = async (which: 'start' | 'end') => {
     try {
@@ -256,6 +257,26 @@ export default function App() {
               Stop
             </button>
           )}
+
+          <label className="flex items-center gap-1.5 text-sm text-slate-400">
+            Max retries
+            <input
+              type="number"
+              min={1}
+              max={5}
+              disabled={running}
+              value={maxAttempts}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                if (!isNaN(v)) setMaxAttempts(Math.min(5, Math.max(1, v)))
+              }}
+              onBlur={(e) => {
+                const v = parseInt(e.target.value, 10)
+                if (isNaN(v) || v < 1 || v > 5) setMaxAttempts(3)
+              }}
+              className="w-14 rounded-lg border border-ink-700 bg-ink-800 px-2 py-1.5 text-center text-sm font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-accent-500 disabled:cursor-not-allowed disabled:opacity-40"
+            />
+          </label>
 
           <div
             className={`flex min-w-[6rem] items-center justify-center rounded-lg border px-3 py-1.5 font-mono text-2xl font-semibold tabular-nums tracking-tight ${

@@ -144,8 +144,9 @@ describe('getLinks', () => {
           query: { pages: { '1': { links: [{ title: 'C' }] } } },
         }),
       )
-    const links = await getLinks('Whatever', 500)
-    expect(links).toEqual(['A', 'B', 'C'])
+    const result = await getLinks('Whatever', 500)
+    expect(result.titles).toEqual(['A', 'B', 'C'])
+    expect(result.calls).toBe(2)
     expect(fetchSpy).toHaveBeenCalledTimes(2)
     // second call should include plcontinue
     const url2 = fetchSpy.mock.calls[1][0] as string
@@ -164,7 +165,8 @@ describe('getLinks', () => {
         },
       }),
     )
-    const links = await getLinks('X', 10)
-    expect(links).toHaveLength(10)
+    const result = await getLinks('X', 10)
+    expect(result.titles).toHaveLength(10)
+    expect(result.calls).toBe(1)
   })
 })

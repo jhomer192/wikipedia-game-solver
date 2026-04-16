@@ -115,10 +115,11 @@ export async function getLinks(
   title: string,
   maxLinks = 500,
   signal?: AbortSignal,
-): Promise<string[]> {
+): Promise<{ titles: string[]; calls: number }> {
   const all: string[] = []
   let plcontinue: string | undefined
   let safety = 0
+  let calls = 0
   while (all.length < maxLinks && safety < 4) {
     const params: Record<string, string> = {
       action: 'query',
@@ -130,6 +131,7 @@ export async function getLinks(
     }
     if (plcontinue) params.plcontinue = plcontinue
     const res = await apiFetch(apiUrl(params), signal)
+    calls += 1
     if (!res || !res.ok) break
     const data = await res.json()
     const pages = data?.query?.pages ?? {}
@@ -140,7 +142,7 @@ export async function getLinks(
     if (!plcontinue) break
     safety += 1
   }
-  return all.slice(0, maxLinks)
+  return { titles: all.slice(0, maxLinks), calls }
 }
 
 export async function getRandomArticle(signal?: AbortSignal): Promise<string | null> {
@@ -202,10 +204,11 @@ export async function getBacklinks(
   title: string,
   maxLinks = 500,
   signal?: AbortSignal,
-): Promise<string[]> {
+): Promise<{ titles: string[]; calls: number }> {
   const all: string[] = []
   let blcontinue: string | undefined
   let safety = 0
+  let calls = 0
   while (all.length < maxLinks && safety < 4) {
     const params: Record<string, string> = {
       action: 'query',
@@ -217,6 +220,7 @@ export async function getBacklinks(
     }
     if (blcontinue) params.blcontinue = blcontinue
     const res = await apiFetch(apiUrl(params), signal)
+    calls += 1
     if (!res || !res.ok) break
     const data = await res.json()
     const items: { title: string }[] = data?.query?.backlinks ?? []
@@ -225,5 +229,5 @@ export async function getBacklinks(
     if (!blcontinue) break
     safety += 1
   }
-  return all.slice(0, maxLinks)
+  return { titles: all.slice(0, maxLinks), calls }
 }

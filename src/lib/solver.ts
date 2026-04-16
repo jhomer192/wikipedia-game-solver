@@ -73,15 +73,15 @@ export async function* solve(
   }
 
   yield { type: 'status', message: `Fetching inbound links to "${end}"` }
-  const backlinksList = await getBacklinks(end, 500, signal).catch(() => [] as string[])
-  apiCalls += 1
-  const backlinks = new Set(backlinksList)
+  const backlinksResult = await getBacklinks(end, 500, signal).catch(() => ({ titles: [] as string[], calls: 1 }))
+  apiCalls += backlinksResult.calls
+  const backlinks = new Set(backlinksResult.titles)
 
   const endTitleTokens = new Set(tokenize(end))
 
-  const startLinksRaw = await getLinks(start, 500, signal)
-  apiCalls += 1
-  const startLinksAll = startLinksRaw.filter((l) => !isMetaTitle(l))
+  const startLinksResult = await getLinks(start, 500, signal)
+  apiCalls += startLinksResult.calls
+  const startLinksAll = startLinksResult.titles.filter((l) => !isMetaTitle(l))
 
   const WEAK_SCORE = 0.005
   let lastStuckReason = `Hit max hop limit of ${maxHops} without finding "${end}".`
@@ -140,9 +140,9 @@ export async function* solve(
       if (backlinkHit) {
         visited.add(backlinkHit)
         currentTitle = backlinkHit
-        const nextLinksRaw = await getLinks(backlinkHit, 500, signal)
-        apiCalls += 1
-        const nextLinks = nextLinksRaw.filter((l) => !isMetaTitle(l))
+        const nextLinksResult = await getLinks(backlinkHit, 500, signal)
+        apiCalls += nextLinksResult.calls
+        const nextLinks = nextLinksResult.titles.filter((l) => !isMetaTitle(l))
         const hitIntro = await getIntro(backlinkHit, signal)
         apiCalls += 1
         const step: VisitedStep = {
@@ -215,9 +215,9 @@ export async function* solve(
       visited.add(next.title)
       currentTitle = next.title
 
-      const nextLinksRaw = await getLinks(next.title, 500, signal)
-      apiCalls += 1
-      const nextLinks = nextLinksRaw.filter((l) => !isMetaTitle(l))
+      const nextLinksResult = await getLinks(next.title, 500, signal)
+      apiCalls += nextLinksResult.calls
+      const nextLinks = nextLinksResult.titles.filter((l) => !isMetaTitle(l))
 
       const step: VisitedStep = {
         index: hops,
