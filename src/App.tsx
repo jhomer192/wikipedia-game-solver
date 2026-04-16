@@ -136,8 +136,18 @@ export default function App() {
               Wikipedia Game Solver
             </h1>
             <p className="mt-1 max-w-xl text-sm text-slate-400">
-              Pick any two Wikipedia articles. A TF-IDF + cosine-similarity greedy walk hops
-              from start to end using only article links.
+              Pick any two Wikipedia articles. A Term Frequency – Inverse Document Frequency
+              (TF-IDF) + cosine-similarity greedy walk hops from start to end using only article
+              links — the classic{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Wikipedia:Wiki_Game"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-400 hover:underline"
+              >
+                Wikipedia Game
+              </a>
+              .
             </p>
           </div>
           <a
@@ -270,18 +280,10 @@ export default function App() {
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">
           At every step the solver grabs the current article&apos;s outgoing links, fetches a short
           intro extract for each candidate (batched via MediaWiki&apos;s <code className="text-slate-300">prop=extracts</code>),
-          and builds TF-IDF vectors from the candidate intros plus the target&apos;s intro. It scores
-          each candidate by cosine similarity to the target and greedily walks to the best unvisited
-          one. Ported from the{' '}
-          <a
-            href="https://github.com/jhomer192/WikipediaGame"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent-400 hover:underline"
-          >
-            Python original
-          </a>
-          .
+          and builds Term Frequency – Inverse Document Frequency (TF-IDF) vectors from the
+          candidate intros plus the target&apos;s intro. It scores each candidate by cosine
+          similarity to the target and greedily walks to the best unvisited one. Adapted from an
+          old personal Python project.
         </p>
       </section>
 
