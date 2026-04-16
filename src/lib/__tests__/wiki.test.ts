@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { opensearch, getIntro, getIntrosBatch, getLinks, articleUrl } from '../wiki'
+import { opensearch, getIntro, getIntrosBatch, getLinks, articleUrl, subscribeRateLimit } from '../wiki'
 
 function mockJson(data: unknown, ok = true) {
   return {
@@ -120,6 +120,40 @@ describe('getIntrosBatch', () => {
     const out = await getIntrosBatch(['dog'])
     expect(out.get('dog')).toBe('about dogs')
     expect(out.get('Dog')).toBe('about dogs')
+  })
+})
+
+describe('subscribeRateLimit', () => {
+  const fetchSpy = vi.fn()
+  beforeEach(() => {
+    fetchSpy.mockReset()
+    vi.stubGlobal('fetch', fetchSpy)
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('fires listener with retryAfter seconds when API returns 429 with Retry-After header', async () => {
+    const mock429 = {
+      ok: false,
+      status: 429,
+      headers: { get: (name: string) => (name === 'Retry-After' ? '30' : null) },
+    } as unknown as Response
+    // Both attempts return 429
+    fetchSpy.mockResolvedValue(mock429)
+
+    const listener = vi.fn()
+    const unsub = subscribeRateLimit(listener)
+
+    await opensearch('foo')
+
+    expect(listener).toHaveBeenCalledWith(30)
+
+    unsub()
+    fetchSpy.mockReset()
+    fetchSpy.mockResolvedValue(mock429)
+    listener.mockClear()
+
+    await opensearch('bar')
+    expect(listener).not.toHaveBeenCalled()
   })
 })
 

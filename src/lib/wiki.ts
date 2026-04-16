@@ -6,6 +6,40 @@ export interface Suggestion {
   url: string
 }
 
+// ---------------------------------------------------------------------------
+// Rate-limit pub/sub
+// ---------------------------------------------------------------------------
+
+type RateLimitListener = (retryAfterSec: number | null) => void
+let rateLimitListeners: RateLimitListener[] = []
+
+export function subscribeRateLimit(cb: RateLimitListener): () => void {
+  rateLimitListeners.push(cb)
+  return () => {
+    rateLimitListeners = rateLimitListeners.filter((x) => x !== cb)
+  }
+}
+
+function notifyRateLimit(retryAfterSec: number | null) {
+  for (const cb of rateLimitListeners) {
+    try { cb(retryAfterSec) } catch { /* ignore */ }
+  }
+}
+
+function parseRetryAfter(h: string | null): number | null {
+  if (!h) return null
+  const n = Number(h)
+  if (Number.isFinite(n) && n >= 0) return n
+  const ms = Date.parse(h)
+  if (Number.isFinite(ms)) {
+    const sec = Math.round((ms - Date.now()) / 1000)
+    return sec > 0 ? sec : 0
+  }
+  return null
+}
+
+// ---------------------------------------------------------------------------
+
 function apiUrl(params: Record<string, string>): string {
   const qp = new URLSearchParams({ ...params, format: 'json', origin: '*' })
   return `${API}?${qp.toString()}`
@@ -26,11 +60,18 @@ async function apiFetch(
     headers['User-Agent'] =
       'wikipedia-game-solver/0.1 (+https://github.com/jhomer192/wikipedia-game-solver)'
   }
+  let lastRes: Response | null = null
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await fetch(url, { signal, headers })
       if (res.ok) return res
-      if (res.status >= 400 && res.status < 500 && res.status !== 429) return res
+      if (res.status === 429) {
+        notifyRateLimit(parseRetryAfter(res.headers.get('Retry-After')))
+        lastRes = res
+        // fall through to backoff / retry
+      } else if (res.status >= 400 && res.status < 500) {
+        return res
+      }
     } catch (err) {
       if (signal?.aborted) throw err
       if (i === attempts - 1) return null
@@ -38,7 +79,8 @@ async function apiFetch(
     if (signal?.aborted) return null
     await new Promise((r) => setTimeout(r, 400 * (i + 1)))
   }
-  return null
+  // All retries exhausted — return last 429 response (or null)
+  return lastRes
 }
 
 export async function opensearch(query: string, signal?: AbortSignal): Promise<Suggestion[]> {

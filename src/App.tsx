@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Autocomplete } from './components/Autocomplete'
 import { PathChain } from './components/PathChain'
 import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
-import { getRandomArticle } from './lib/wiki'
+import { getRandomArticle, subscribeRateLimit } from './lib/wiki'
 
 function formatElapsed(seconds: number, hasRun: boolean): string {
   if (!hasRun) return '--'
@@ -35,12 +35,14 @@ export default function App() {
   const [log, setLog] = useState<LogEntry[]>([])
   const [logOpen, setLogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [rateLimited, setRateLimited] = useState<{ retryAfter: number | null } | null>(null)
 
   const abortRef = useRef<AbortController | null>(null)
   const startTsRef = useRef(0)
   const tickTimerRef = useRef<number | null>(null)
   const hasRunRef = useRef(false)
   const lastAttemptRef = useRef<VisitedStep[]>([])
+  const rateLimitTimerRef = useRef<number | null>(null)
 
   const startElapsed = () => {
     hasRunRef.current = true
@@ -63,6 +65,22 @@ export default function App() {
     return () => {
       abortRef.current?.abort()
       if (tickTimerRef.current) window.clearInterval(tickTimerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    const unsub = subscribeRateLimit((retryAfter) => {
+      setRateLimited({ retryAfter })
+      if (rateLimitTimerRef.current) window.clearTimeout(rateLimitTimerRef.current)
+      const delay = (retryAfter != null && retryAfter > 0 ? retryAfter : 60) * 1000
+      rateLimitTimerRef.current = window.setTimeout(() => {
+        setRateLimited(null)
+        rateLimitTimerRef.current = null
+      }, delay)
+    })
+    return () => {
+      unsub()
+      if (rateLimitTimerRef.current) window.clearTimeout(rateLimitTimerRef.current)
     }
   }, [])
 
@@ -193,6 +211,34 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {rateLimited && (
+        <div className="flex items-start justify-between gap-3 rounded-xl border border-amber-700/50 bg-amber-900/30 px-4 py-3 text-sm text-amber-200">
+          <div>
+            <p className="font-semibold">Wikipedia is rate-limiting this session</p>
+            <p className="mt-0.5 text-amber-300/80">
+              The API returned HTTP 429. The solver may stall or fail until the limit clears.
+              {rateLimited.retryAfter != null && (
+                <> Retry in ~{rateLimited.retryAfter}s.</>
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Dismiss rate-limit warning"
+            onClick={() => {
+              setRateLimited(null)
+              if (rateLimitTimerRef.current) {
+                window.clearTimeout(rateLimitTimerRef.current)
+                rateLimitTimerRef.current = null
+              }
+            }}
+            className="mt-0.5 flex-shrink-0 text-amber-400 hover:text-amber-200"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+      )}
 
       <section className="rounded-2xl border border-ink-700 bg-ink-900/50 p-4 shadow-glow backdrop-blur-sm sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
