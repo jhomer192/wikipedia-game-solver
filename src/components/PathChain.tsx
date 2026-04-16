@@ -86,7 +86,7 @@ function NodeCard({
       </p>
       <div className="mt-auto flex items-center justify-between gap-2 pt-1">
         <span className="text-[10px] text-slate-500">
-          {step.outgoingLinks > 0 ? `${step.outgoingLinks} links` : '—'}
+          {step.outgoingLinks > 0 ? `${step.outgoingLinks} links` : '--'}
         </span>
         <a
           href={articleUrl(step.title)}

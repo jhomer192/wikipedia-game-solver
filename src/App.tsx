@@ -5,7 +5,7 @@ import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
 import { getRandomArticle } from './lib/wiki'
 
 function formatElapsed(seconds: number, hasRun: boolean): string {
-  if (!hasRun) return '—'
+  if (!hasRun) return '--'
   if (seconds >= 60) {
     const m = Math.floor(seconds / 60)
     const s = seconds % 60
@@ -176,9 +176,7 @@ export default function App() {
               Wikipedia Game Solver
             </h1>
             <p className="mt-1 max-w-xl text-sm text-slate-400">
-              Pick any two Wikipedia articles. A Term Frequency – Inverse Document Frequency
-              (TF-IDF) + cosine-similarity greedy walk hops from start to end using only article
-              links — the classic{' '}
+              The{' '}
               <a
                 href="https://en.wikipedia.org/wiki/Wikipedia:Wiki_Game"
                 target="_blank"
@@ -187,7 +185,10 @@ export default function App() {
               >
                 Wikipedia Game
               </a>
-              .
+              {' '}challenges you to navigate from one article to another using only the hyperlinks
+              inside each page. This tool automates that search with a text-similarity heuristic
+              (TF-IDF + cosine similarity) that scores each outgoing link against the target and
+              greedily follows the best one.
             </p>
           </div>
         </div>
