@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Autocomplete } from './components/Autocomplete'
 import { PathChain } from './components/PathChain'
 import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
+import { getRandomArticle } from './lib/wiki'
 
 interface LogEntry {
   time: number
@@ -123,6 +124,14 @@ export default function App() {
     }
   }, [start, end])
 
+  const pickRandom = async (which: 'start' | 'end') => {
+    const title = await getRandomArticle()
+    if (title) {
+      if (which === 'start') setStart(title)
+      else setEnd(title)
+    }
+  }
+
   const stop = () => {
     abortRef.current?.abort()
     setRunning(false)
@@ -160,20 +169,48 @@ export default function App() {
 
       <section className="rounded-2xl border border-ink-700 bg-ink-900/50 p-4 shadow-glow backdrop-blur-sm sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Autocomplete
-            id="start-article"
-            label="Start article"
-            placeholder="e.g. Dog"
-            value={start}
-            onChange={setStart}
-          />
-          <Autocomplete
-            id="end-article"
-            label="End article"
-            placeholder="e.g. Albert Einstein"
-            value={end}
-            onChange={setEnd}
-          />
+          <div className="flex items-end gap-2">
+            <div className="min-w-0 flex-1">
+              <Autocomplete
+                id="start-article"
+                label="Start article"
+                placeholder="e.g. Dog"
+                value={start}
+                onChange={setStart}
+              />
+            </div>
+            <button
+              type="button"
+              title="Pick a random article"
+              aria-label="Pick a random article"
+              disabled={running}
+              onClick={() => pickRandom('start')}
+              className="mb-0.5 flex-shrink-0 rounded-lg border border-ink-700 bg-ink-800 px-2.5 py-2 text-base leading-none text-slate-300 transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              🎲
+            </button>
+          </div>
+          <div className="flex items-end gap-2">
+            <div className="min-w-0 flex-1">
+              <Autocomplete
+                id="end-article"
+                label="End article"
+                placeholder="e.g. Albert Einstein"
+                value={end}
+                onChange={setEnd}
+              />
+            </div>
+            <button
+              type="button"
+              title="Pick a random article"
+              aria-label="Pick a random article"
+              disabled={running}
+              onClick={() => pickRandom('end')}
+              className="mb-0.5 flex-shrink-0 rounded-lg border border-ink-700 bg-ink-800 px-2.5 py-2 text-base leading-none text-slate-300 transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              🎲
+            </button>
+          </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {!running ? (

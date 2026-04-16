@@ -143,6 +143,17 @@ export async function getLinks(
   return all.slice(0, maxLinks)
 }
 
+export async function getRandomArticle(signal?: AbortSignal): Promise<string | null> {
+  const res = await apiFetch(
+    apiUrl({ action: 'query', list: 'random', rnnamespace: '0', rnlimit: '1' }),
+    signal,
+  )
+  if (!res || !res.ok) return null
+  const data = await res.json()
+  const items: { title: string }[] = data?.query?.random ?? []
+  return items[0]?.title ?? null
+}
+
 export function articleUrl(title: string): string {
   return `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`
 }
