@@ -49,6 +49,8 @@ export async function* solve(
     signal,
   } = opts
 
+  const FLAT_THRESHOLD = 0.005
+
   let apiCalls = 0
   let candidatesScored = 0
   // Visited persists across attempts so each restart is forced to diverge
@@ -94,6 +96,7 @@ export async function* solve(
       yield { type: 'restart', attempt }
     }
 
+    const recentTitles: string[] = []
     visited.add(start)
     const initialLinks = startLinksAll.filter((l) => !visited.has(l))
     if (initialLinks.length === 0) {
@@ -199,9 +202,32 @@ export async function* solve(
       })
 
       const scored = boosted.sort((a, b) => b.score - a.score)
-      const top5 = scored.slice(0, 5)
 
-      const next = scored.find((s) => !visited.has(s.title))
+      const isFlat =
+        scored.length >= 3 &&
+        scored[0].score - scored[Math.min(4, scored.length - 1)].score < FLAT_THRESHOLD
+
+      let finalScored = scored
+      if (isFlat) {
+        yield { type: 'status', message: `Flat scoring detected at "${currentTitle}" - escaping cluster` }
+        const recentWords = new Set<string>()
+        for (const t of recentTitles) {
+          for (const w of tokenize(t)) recentWords.add(w)
+        }
+        const escapeCandidates = scored.map(({ title, score }) => {
+          const words = tokenize(title)
+          const overlapCount = words.filter((w) => recentWords.has(w)).length
+          const overlapRatio = words.length > 0 ? overlapCount / words.length : 0
+          const noveltyPenalty = -0.3 * overlapRatio
+          const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
+          return { title, score: score + noveltyPenalty + hubBonus }
+        })
+        finalScored = escapeCandidates.sort((a, b) => b.score - a.score)
+      }
+
+      const top5 = finalScored.slice(0, 5)
+
+      const next = finalScored.find((s) => !visited.has(s.title))
       if (!next) {
         attemptStuckReason = `No unvisited candidates at "${currentTitle}".`
         break
@@ -219,6 +245,8 @@ export async function* solve(
 
       visited.add(next.title)
       currentTitle = next.title
+      recentTitles.push(next.title)
+      if (recentTitles.length > 5) recentTitles.shift()
 
       const nextLinksResult = await getLinks(next.title, 500, signal)
       apiCalls += nextLinksResult.calls
