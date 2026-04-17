@@ -10,8 +10,6 @@ type ThemeId = (typeof THEMES)[number]['id']
 
 const STORAGE_KEY = 'site-theme'
 
-const OLD_THEMES = ['mocha', 'tokyo-night', 'dracula', 'nord', 'forest']
-
 export function ThemePicker() {
   const [active, setActive] = useState<ThemeId>(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as ThemeId | null
