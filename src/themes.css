@@ -31,32 +31,32 @@ html[data-theme='tokyo-night'] {
   --accent-3: #bb9af7;
 }
 
-html[data-theme='dracula'] {
-  --bg: #282a36;
-  --surface: #44475a;
-  --surface-hover: #4f5273;
-  --border: #6272a4;
-  --border-strong: #7282b4;
-  --text: #f8f8f2;
-  --text-muted: #c3c3c6;
-  --text-dim: #6272a4;
-  --accent: #ff79c6;
-  --accent-hover: #ff92d0;
-  --accent-2: #bd93f9;
-  --accent-3: #8be9fd;
+html[data-theme='miami'] {
+  --bg: #0d0221;
+  --surface: #1a0a3e;
+  --surface-hover: #2d1b69;
+  --border: #3d2b7a;
+  --border-strong: #5a45a0;
+  --text: #f0e6ff;
+  --text-muted: #c4b5d9;
+  --text-dim: #7a6b94;
+  --accent: #ff2d95;
+  --accent-hover: #ff5aad;
+  --accent-2: #00f0ff;
+  --accent-3: #f7ff00;
 }
 
-html[data-theme='nord'] {
-  --bg: #2e3440;
-  --surface: #3b4252;
-  --surface-hover: #434c5e;
-  --border: #4c566a;
-  --border-strong: #5e6779;
-  --text: #eceff4;
-  --text-muted: #d8dee9;
-  --text-dim: #616e88;
-  --accent: #a3be8c;
-  --accent-hover: #b4cf9e;
-  --accent-2: #88c0d0;
-  --accent-3: #b48ead;
+html[data-theme='forest'] {
+  --bg: #1a2118;
+  --surface: #243024;
+  --surface-hover: #2e3e2e;
+  --border: #3a4d3a;
+  --border-strong: #4d6347;
+  --text: #d4dcd0;
+  --text-muted: #a8b5a2;
+  --text-dim: #6b7d65;
+  --accent: #8fbc6a;
+  --accent-hover: #a3d07e;
+  --accent-2: #c9a96e;
+  --accent-3: #6bb5a0;
 }
