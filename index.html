@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/wikipedia-game-solver/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wikipedia Game Solver</title>
+    <meta
+      name="description"
+      content="Greedy TF-IDF walker that finds a path between two Wikipedia articles by following hyperlinks."
+    />
+    <link rel="preconnect" href="https://en.wikipedia.org" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <script>
+      (function () {
+        var old = ['mocha', 'tokyo-night', 'dracula', 'nord', 'forest'];
+        var stored = localStorage.getItem('site-theme');
+        document.documentElement.dataset.theme = (stored && old.indexOf(stored) === -1) ? stored : 'tokyo';
+      })()
+    </script>
+    <script type="module" crossorigin src="/wikipedia-game-solver/assets/index-BZEyEYj-.js"></script>
+    <link rel="stylesheet" crossorigin href="/wikipedia-game-solver/assets/index-CwXPkCwm.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
