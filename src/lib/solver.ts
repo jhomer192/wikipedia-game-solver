@@ -49,7 +49,7 @@ export async function* solve(
     signal,
   } = opts
 
-  const FLAT_THRESHOLD = 0.005
+  const FLAT_THRESHOLD = 0.01
 
   let apiCalls = 0
   let candidatesScored = 0
@@ -244,7 +244,8 @@ export async function* solve(
           const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
           // Use actual page byte size as hub signal (bigger article = more outgoing links)
           const pageSize = pageSizes.get(title) ?? 0
-          const pageSizeBonus = 1.0 * Math.min(1, pageSize / 80000)
+          // Log scale: 80KB article gets ~1.0, 250KB gets ~1.4, tiny stubs get near 0
+          const pageSizeBonus = pageSize > 0 ? Math.max(0, Math.log(pageSize / 5000) / Math.log(16)) : 0
           return { title, score: score + noveltyPenalty + hubBonus + pageSizeBonus }
         })
         finalScored = escapeCandidates.sort((a, b) => b.score - a.score)
