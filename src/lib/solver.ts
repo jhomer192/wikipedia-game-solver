@@ -244,7 +244,7 @@ export async function* solve(
           const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
           // Use actual page byte size as hub signal (bigger article = more outgoing links)
           const pageSize = pageSizes.get(title) ?? 0
-          const pageSizeBonus = 0.12 * Math.min(1, pageSize / 80000)
+          const pageSizeBonus = 1.0 * Math.min(1, pageSize / 80000)
           return { title, score: score + noveltyPenalty + hubBonus + pageSizeBonus }
         })
         finalScored = escapeCandidates.sort((a, b) => b.score - a.score)
