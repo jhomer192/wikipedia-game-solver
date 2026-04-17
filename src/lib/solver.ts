@@ -220,7 +220,10 @@ export async function* solve(
           const overlapRatio = words.length > 0 ? overlapCount / words.length : 0
           const noveltyPenalty = -0.3 * overlapRatio
           const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
-          return { title, score: score + noveltyPenalty + hubBonus }
+          // Prefer articles with longer intros (more content = more outgoing links = better hub)
+          const introLen = (introMap.get(title) ?? '').length
+          const introHubBonus = 0.08 * Math.min(1, introLen / 2000)
+          return { title, score: score + noveltyPenalty + hubBonus + introHubBonus }
         })
         finalScored = escapeCandidates.sort((a, b) => b.score - a.score)
       }
