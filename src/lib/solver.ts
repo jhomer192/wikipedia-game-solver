@@ -203,24 +203,45 @@ export async function* solve(
 
       const scored = boosted.sort((a, b) => b.score - a.score)
 
+      // Detect year-variant loops: "2019 X season", "2020 X season", "2018 X season"
+      // Strip 4-digit years from recent titles and check if they collapse to the same string
+      const stripYears = (s: string) => s.replace(/\b\d{4}\b/g, '').replace(/\s+/g, ' ').trim()
+      const isYearLoop =
+        recentTitles.length >= 3 &&
+        new Set(recentTitles.slice(-3).map(stripYears)).size === 1
+
       const isFlat =
         scored.length >= 3 &&
         scored[0].score - scored[Math.min(4, scored.length - 1)].score < FLAT_THRESHOLD
 
+      const shouldEscape = isFlat || isYearLoop
+
       let finalScored = scored
-      if (isFlat) {
-        yield { type: 'status', message: `Flat scoring detected at "${currentTitle}" - escaping cluster` }
+      if (shouldEscape) {
+        const reason = isYearLoop ? 'Year-variant loop' : 'Flat scoring'
+        yield { type: 'status', message: `${reason} detected at "${currentTitle}" - escaping cluster` }
         const recentWords = new Set<string>()
         for (const t of recentTitles) {
           for (const w of tokenize(t)) recentWords.add(w)
         }
-        const escapeCandidates = scored.map(({ title, score }) => {
+
+        // Hard-filter: remove candidates that share 50%+ words with recent titles
+        const filtered = scored.filter(({ title }) => {
+          const words = tokenize(title)
+          if (words.length === 0) return true
+          const overlapCount = words.filter((w) => recentWords.has(w)).length
+          return overlapCount / words.length < 0.5
+        })
+
+        // If hard-filter removed everything, fall back to all candidates
+        const pool = filtered.length > 0 ? filtered : scored
+
+        const escapeCandidates = pool.map(({ title, score }) => {
           const words = tokenize(title)
           const overlapCount = words.filter((w) => recentWords.has(w)).length
           const overlapRatio = words.length > 0 ? overlapCount / words.length : 0
           const noveltyPenalty = -0.3 * overlapRatio
           const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
-          // Prefer articles with longer intros (more content = more outgoing links = better hub)
           const introLen = (introMap.get(title) ?? '').length
           const introHubBonus = 0.08 * Math.min(1, introLen / 2000)
           return { title, score: score + noveltyPenalty + hubBonus + introHubBonus }
