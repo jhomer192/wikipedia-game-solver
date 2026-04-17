@@ -182,7 +182,7 @@ export async function* solve(
         message: `Scoring ${candidates.length} candidates from "${currentTitle}"`,
       }
 
-      const introMap = await getIntrosBatch(candidates, signal)
+      const { intros: introMap, pageSizes } = await getIntrosBatch(candidates, signal)
       apiCalls += Math.ceil(candidates.length / 20)
 
       const texts = candidates.map((c) => introMap.get(c) ?? '')
@@ -242,9 +242,10 @@ export async function* solve(
           const overlapRatio = words.length > 0 ? overlapCount / words.length : 0
           const noveltyPenalty = -0.3 * overlapRatio
           const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
-          const introLen = (introMap.get(title) ?? '').length
-          const introHubBonus = 0.08 * Math.min(1, introLen / 2000)
-          return { title, score: score + noveltyPenalty + hubBonus + introHubBonus }
+          // Use actual page byte size as hub signal (bigger article = more outgoing links)
+          const pageSize = pageSizes.get(title) ?? 0
+          const pageSizeBonus = 0.12 * Math.min(1, pageSize / 80000)
+          return { title, score: score + noveltyPenalty + hubBonus + pageSizeBonus }
         })
         finalScored = escapeCandidates.sort((a, b) => b.score - a.score)
       }

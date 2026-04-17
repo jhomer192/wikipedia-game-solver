@@ -96,8 +96,10 @@ describe('getIntrosBatch', () => {
   })
   afterEach(() => vi.unstubAllGlobals())
 
-  it('returns empty map for empty titles', async () => {
-    expect((await getIntrosBatch([])).size).toBe(0)
+  it('returns empty maps for empty titles', async () => {
+    const result = await getIntrosBatch([])
+    expect(result.intros.size).toBe(0)
+    expect(result.pageSizes.size).toBe(0)
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
@@ -113,13 +115,15 @@ describe('getIntrosBatch', () => {
       mockJson({
         query: {
           normalized: [{ from: 'dog', to: 'Dog' }],
-          pages: { '1': { title: 'Dog', extract: 'about dogs' } },
+          pages: { '1': { title: 'Dog', extract: 'about dogs', length: 50000 } },
         },
       }),
     )
-    const out = await getIntrosBatch(['dog'])
-    expect(out.get('dog')).toBe('about dogs')
-    expect(out.get('Dog')).toBe('about dogs')
+    const { intros, pageSizes } = await getIntrosBatch(['dog'])
+    expect(intros.get('dog')).toBe('about dogs')
+    expect(intros.get('Dog')).toBe('about dogs')
+    expect(pageSizes.get('Dog')).toBe(50000)
+    expect(pageSizes.get('dog')).toBe(50000)
   })
 })
 

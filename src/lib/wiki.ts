@@ -118,12 +118,18 @@ export async function getIntro(title: string, signal?: AbortSignal): Promise<str
   return first?.extract ?? ''
 }
 
+export interface IntrosBatchResult {
+  intros: Map<string, string>
+  pageSizes: Map<string, number>
+}
+
 export async function getIntrosBatch(
   titles: string[],
   signal?: AbortSignal,
-): Promise<Map<string, string>> {
-  const out = new Map<string, string>()
-  if (titles.length === 0) return out
+): Promise<IntrosBatchResult> {
+  const intros = new Map<string, string>()
+  const pageSizes = new Map<string, number>()
+  if (titles.length === 0) return { intros, pageSizes }
   const BATCH = 20
   for (let i = 0; i < titles.length; i += BATCH) {
     const chunk = titles.slice(i, i + BATCH)
@@ -131,7 +137,7 @@ export async function getIntrosBatch(
       apiUrl({
         action: 'query',
         titles: chunk.join('|'),
-        prop: 'extracts',
+        prop: 'extracts|info',
         exintro: 'true',
         explaintext: 'true',
         redirects: '1',
@@ -143,14 +149,18 @@ export async function getIntrosBatch(
     const normalized: { from: string; to: string }[] = data?.query?.normalized ?? []
     const normMap = new Map(normalized.map((n) => [n.to, n.from]))
     const pages = data?.query?.pages ?? {}
-    for (const p of Object.values(pages) as { title?: string; extract?: string }[]) {
+    for (const p of Object.values(pages) as { title?: string; extract?: string; length?: number }[]) {
       if (!p.title) continue
       const originalTitle = normMap.get(p.title) ?? p.title
-      out.set(originalTitle, p.extract ?? '')
-      out.set(p.title, p.extract ?? '')
+      intros.set(originalTitle, p.extract ?? '')
+      intros.set(p.title, p.extract ?? '')
+      if (p.length != null) {
+        pageSizes.set(originalTitle, p.length)
+        pageSizes.set(p.title, p.length)
+      }
     }
   }
-  return out
+  return { intros, pageSizes }
 }
 
 export async function getLinks(
