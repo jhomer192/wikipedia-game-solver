@@ -16,8 +16,6 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap"
     />
-  </head>
-  <body>
     <script>
       (function () {
         var old = ['mocha', 'tokyo-night', 'dracula', 'nord', 'forest'];
@@ -25,6 +23,8 @@
         document.documentElement.dataset.theme = (stored && old.indexOf(stored) === -1) ? stored : 'tokyo';
       })()
     </script>
+  </head>
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
