@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react'
 
 const THEMES = [
-  { id: 'mocha', label: 'Mocha', color: '#f5c2e7' },
-  { id: 'tokyo-night', label: 'Tokyo Night', color: '#73daca' },
+  { id: 'tokyo', label: 'Tokyo Night', color: '#73daca' },
   { id: 'miami', label: 'Miami', color: '#ff2d95' },
-  { id: 'forest', label: 'Forest', color: '#8fbc6a' },
+  { id: 'matcha', label: 'Matcha', color: '#8db660' },
 ] as const
 
 type ThemeId = (typeof THEMES)[number]['id']
 
 const STORAGE_KEY = 'site-theme'
 
+const OLD_THEMES = ['mocha', 'tokyo-night', 'dracula', 'nord', 'forest']
+
 export function ThemePicker() {
   const [active, setActive] = useState<ThemeId>(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as ThemeId | null
-    return stored && THEMES.some((t) => t.id === stored) ? stored : 'mocha'
+    if (stored && THEMES.some((t) => t.id === stored)) return stored
+    return 'tokyo'
   })
 
   useEffect(() => {

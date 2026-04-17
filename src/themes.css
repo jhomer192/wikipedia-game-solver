@@ -1,22 +1,7 @@
-/* Theme system — CSS custom properties */
+/* Theme system -- CSS custom properties */
 
 html,
-html[data-theme='mocha'] {
-  --bg: #1e1e2e;
-  --surface: #313244;
-  --surface-hover: #45475a;
-  --border: #45475a;
-  --border-strong: #585b70;
-  --text: #cdd6f4;
-  --text-muted: #a6adc8;
-  --text-dim: #6c7086;
-  --accent: #f5c2e7;
-  --accent-hover: #f0b0de;
-  --accent-2: #cba6f7;
-  --accent-3: #89b4fa;
-}
-
-html[data-theme='tokyo-night'] {
+html[data-theme='tokyo'] {
   --bg: #16161e;
   --surface: #1a1b26;
   --surface-hover: #292e42;
@@ -46,17 +31,17 @@ html[data-theme='miami'] {
   --accent-3: #f7ff00;
 }
 
-html[data-theme='forest'] {
-  --bg: #1a2118;
-  --surface: #243024;
-  --surface-hover: #2e3e2e;
-  --border: #3a4d3a;
-  --border-strong: #4d6347;
-  --text: #d4dcd0;
-  --text-muted: #a8b5a2;
-  --text-dim: #6b7d65;
-  --accent: #8fbc6a;
-  --accent-hover: #a3d07e;
-  --accent-2: #c9a96e;
-  --accent-3: #6bb5a0;
+html[data-theme='matcha'] {
+  --bg: #1c1a17;
+  --surface: #2a2722;
+  --surface-hover: #363229;
+  --border: #4a4438;
+  --border-strong: #5e5647;
+  --text: #e8e0d0;
+  --text-muted: #bfb8a8;
+  --text-dim: #7d7668;
+  --accent: #8db660;
+  --accent-hover: #a0c878;
+  --accent-2: #d4a852;
+  --accent-3: #c17f59;
 }
