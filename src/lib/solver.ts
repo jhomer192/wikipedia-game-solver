@@ -28,6 +28,7 @@ export interface SolverOptions {
   maxHops?: number
   maxCandidatesPerStep?: number
   titleBoostWeight?: number
+  titleLengthBoostWeight?: number
   stuckTolerance?: number
   maxAttempts?: number
   signal?: AbortSignal
@@ -42,6 +43,7 @@ export async function* solve(
     maxHops = 50,
     maxCandidatesPerStep = 40,
     titleBoostWeight = 0.35,
+    titleLengthBoostWeight = 0.05,
     stuckTolerance = 2,
     maxAttempts = 3,
     signal,
@@ -164,7 +166,7 @@ export async function* solve(
       }
 
       const candidates = currentLinks
-        .filter((l) => !visited.has(l))
+        .filter((l) => !visited.has(l) && l.length <= 80)
         .slice(0, maxCandidatesPerStep)
 
       if (candidates.length === 0) {
@@ -190,7 +192,10 @@ export async function* solve(
         for (const t of candTokens) if (endTitleTokens.has(t)) overlap += 1
         const denom = Math.max(endTitleTokens.size, 1)
         const boost = titleBoostWeight * (overlap / denom)
-        return { title, score: cosineScores[i] + boost }
+        // Hub bias: shorter titles tend to be broader hub articles; long titles
+        // are often narrow disambiguation or "2003 X season" articles.
+        const lengthBias = titleLengthBoostWeight * Math.max(0, 1 - title.length / 50)
+        return { title, score: cosineScores[i] + boost + lengthBias }
       })
 
       const scored = boosted.sort((a, b) => b.score - a.score)
