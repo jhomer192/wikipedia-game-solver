@@ -12,19 +12,18 @@ type ThemeId = (typeof THEMES)[number]['id']
 const STORAGE_KEY = 'site-theme'
 
 export function ThemePicker() {
-  const [active, setActive] = useState<ThemeId>('mocha')
+  const [active, setActive] = useState<ThemeId>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY) as ThemeId | null
+    return stored && THEMES.some((t) => t.id === stored) ? stored : 'mocha'
+  })
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as ThemeId | null
-    if (stored && THEMES.some((t) => t.id === stored)) {
-      setActive(stored)
-    }
-  }, [])
+    document.documentElement.dataset.theme = active
+    localStorage.setItem(STORAGE_KEY, active)
+  }, [active])
 
   const apply = (id: ThemeId) => {
     setActive(id)
-    document.documentElement.dataset.theme = id
-    localStorage.setItem(STORAGE_KEY, id)
   }
 
   return (
