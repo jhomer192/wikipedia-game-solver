@@ -9,6 +9,7 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
+        // Legacy ink palette (kept for amber/rose/emerald/violet accents still in use)
         ink: {
           950: '#05070d',
           900: '#0a0d17',
@@ -16,14 +17,24 @@ export default {
           700: '#1a1f31',
           600: '#262c42',
         },
+        // Theme-aware tokens
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        'surface-hover': 'var(--surface-hover)',
+        border: 'var(--border)',
+        'border-strong': 'var(--border-strong)',
+        text: 'var(--text)',
+        'text-muted': 'var(--text-muted)',
+        'text-dim': 'var(--text-dim)',
         accent: {
-          400: '#7dd3fc',
-          500: '#38bdf8',
-          600: '#0ea5e9',
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          2: 'var(--accent-2)',
+          3: 'var(--accent-3)',
         },
       },
       boxShadow: {
-        glow: '0 0 40px -10px rgba(56,189,248,0.45)',
+        glow: '0 0 40px -10px color-mix(in srgb, var(--accent) 45%, transparent)',
       },
     },
   },

@@ -94,17 +94,17 @@ function NodeCard({
   const tone = isGoal
     ? 'border-emerald-400/50 shadow-emerald-400/20 bg-emerald-500/5'
     : isStart
-      ? 'border-accent-500/50 shadow-accent-500/20 bg-accent-500/5'
+      ? 'border-accent/50 shadow-accent/20 bg-accent/5'
       : isCurrent
         ? 'border-violet-400/60 shadow-violet-400/30 bg-violet-500/10 animate-[pulse_1.4s_ease-in-out_infinite]'
-        : 'border-ink-700 bg-ink-900/70'
+        : 'border-border bg-surface/70'
 
   const badge = isGoal ? 'GOAL' : isStart ? 'START' : `HOP ${step.index}`
   const badgeTone = isGoal
     ? 'bg-emerald-500/20 text-emerald-200'
     : isStart
-      ? 'bg-accent-500/20 text-accent-400'
-      : 'bg-ink-800 text-slate-400'
+      ? 'bg-accent/20 text-accent'
+      : 'bg-surface text-text-muted'
 
   return (
     <article
@@ -115,24 +115,24 @@ function NodeCard({
           {badge}
         </span>
         {!isStart && !isGoal && (
-          <span className="font-mono text-xs text-slate-400">
+          <span className="font-mono text-xs text-text-muted">
             {(step.similarity * 100).toFixed(1)}%
           </span>
         )}
       </div>
-      <h3 className="line-clamp-2 text-sm font-semibold text-slate-100">{step.title}</h3>
-      <p className="line-clamp-3 min-h-[3rem] text-xs leading-snug text-slate-400">
+      <h3 className="line-clamp-2 text-sm font-semibold text-text">{step.title}</h3>
+      <p className="line-clamp-3 min-h-[3rem] text-xs leading-snug text-text-muted">
         {step.intro || 'No extract available.'}
       </p>
       <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-        <span className="text-[10px] text-slate-500">
+        <span className="text-[10px] text-text-dim">
           {step.outgoingLinks > 0 ? `${step.outgoingLinks} links` : '--'}
         </span>
         <a
           href={articleUrl(step.title)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 rounded-md border border-ink-700 bg-ink-800/80 px-2 py-1 text-[11px] font-medium text-accent-400 transition-colors hover:border-accent-500/60 hover:text-accent-400"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-surface/80 px-2 py-1 text-[11px] font-medium text-accent transition-colors hover:border-accent/60 hover:text-accent-hover"
           aria-label={`Open ${step.title} on Wikipedia`}
         >
           Wikipedia
@@ -158,12 +158,12 @@ function Arrow({ horizontal = false }: { horizontal?: boolean }) {
         <svg width="34" height="18" viewBox="0 0 34 18" fill="none">
           <defs>
             <linearGradient id="arrowGradH" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#334155" />
-              <stop offset="100%" stopColor="#7dd3fc" />
+              <stop offset="0%" stopColor="var(--border-strong)" />
+              <stop offset="100%" stopColor="var(--accent)" />
             </linearGradient>
           </defs>
           <line x1="2" y1="9" x2="28" y2="9" stroke="url(#arrowGradH)" strokeWidth="2" />
-          <path d="M24 4 L32 9 L24 14" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M24 4 L32 9 L24 14" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
     )
@@ -174,12 +174,12 @@ function Arrow({ horizontal = false }: { horizontal?: boolean }) {
       <svg width="18" height="34" viewBox="0 0 18 34" fill="none">
         <defs>
           <linearGradient id="arrowGradV" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#334155" />
-            <stop offset="100%" stopColor="#7dd3fc" />
+            <stop offset="0%" stopColor="var(--border-strong)" />
+            <stop offset="100%" stopColor="var(--accent)" />
           </linearGradient>
         </defs>
         <line x1="9" y1="2" x2="9" y2="28" stroke="url(#arrowGradV)" strokeWidth="2" />
-        <path d="M4 24 L9 32 L14 24" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4 24 L9 32 L14 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   )
@@ -191,12 +191,12 @@ function DownArrow() {
       <svg width="18" height="34" viewBox="0 0 18 34" fill="none">
         <defs>
           <linearGradient id="arrowGradDown" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#334155" />
-            <stop offset="100%" stopColor="#7dd3fc" />
+            <stop offset="0%" stopColor="var(--border-strong)" />
+            <stop offset="100%" stopColor="var(--accent)" />
           </linearGradient>
         </defs>
         <line x1="9" y1="2" x2="9" y2="28" stroke="url(#arrowGradDown)" strokeWidth="2" />
-        <path d="M4 24 L9 32 L14 24" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4 24 L9 32 L14 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   )

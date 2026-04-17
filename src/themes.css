@@ -1,0 +1,62 @@
+/* Theme system — CSS custom properties */
+
+html,
+html[data-theme='mocha'] {
+  --bg: #1e1e2e;
+  --surface: #313244;
+  --surface-hover: #45475a;
+  --border: #45475a;
+  --border-strong: #585b70;
+  --text: #cdd6f4;
+  --text-muted: #bac2de;
+  --text-dim: #a6adc8;
+  --accent: #cba6f7;
+  --accent-hover: #d5baff;
+  --accent-2: #89dceb;
+  --accent-3: #cba6f7;
+}
+
+html[data-theme='tokyo-night'] {
+  --bg: #1a1b26;
+  --surface: #24283b;
+  --surface-hover: #2f3549;
+  --border: #2f3549;
+  --border-strong: #414868;
+  --text: #c0caf5;
+  --text-muted: #a9b1d6;
+  --text-dim: #9aa5ce;
+  --accent: #7aa2f7;
+  --accent-hover: #89b4fa;
+  --accent-2: #7dcfff;
+  --accent-3: #bb9af7;
+}
+
+html[data-theme='dracula'] {
+  --bg: #282a36;
+  --surface: #343746;
+  --surface-hover: #44475a;
+  --border: #44475a;
+  --border-strong: #6272a4;
+  --text: #f8f8f2;
+  --text-muted: #e0e0e0;
+  --text-dim: #bfbfbf;
+  --accent: #bd93f9;
+  --accent-hover: #caa8ff;
+  --accent-2: #8be9fd;
+  --accent-3: #ff79c6;
+}
+
+html[data-theme='nord'] {
+  --bg: #2e3440;
+  --surface: #3b4252;
+  --surface-hover: #434c5e;
+  --border: #434c5e;
+  --border-strong: #4c566a;
+  --text: #eceff4;
+  --text-muted: #e5e9f0;
+  --text-dim: #d8dee9;
+  --accent: #88c0d0;
+  --accent-hover: #9ecfdf;
+  --accent-2: #81a1c1;
+  --accent-3: #b48ead;
+}

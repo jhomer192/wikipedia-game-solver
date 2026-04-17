@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Autocomplete } from './components/Autocomplete'
 import { PathChain } from './components/PathChain'
+import { ThemePicker } from './components/ThemePicker'
 import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
 import { getRandomArticle, subscribeRateLimit } from './lib/wiki'
 
@@ -119,7 +120,7 @@ export default function App() {
             ...l,
             {
               time: performance.now(),
-              message: `→ ${ev.step.title}  (${(ev.step.similarity * 100).toFixed(2)}%)`,
+              message: `-> ${ev.step.title}  (${(ev.step.similarity * 100).toFixed(2)}%)`,
               kind: 'info',
               topCandidates: ev.topCandidates,
             },
@@ -172,7 +173,7 @@ export default function App() {
         else setEnd(title)
       }
     } catch {
-      // network error — user can click again
+      // network error -- user can click again
     }
   }
 
@@ -190,16 +191,19 @@ export default function App() {
       <header>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="bg-gradient-to-r from-sky-300 via-cyan-200 to-violet-300 bg-clip-text font-display text-2xl font-bold tracking-tight text-transparent sm:text-4xl">
-              Wikipedia Game Solver
+            <h1 className="flex items-center gap-3 font-display text-2xl font-bold tracking-tight sm:text-4xl">
+              <img src="/logo.svg" alt="Wikipedia Game Solver logo" className="h-8 w-8 sm:h-10 sm:w-10" />
+              <span className="bg-gradient-to-r from-accent via-accent-2 to-accent-3 bg-clip-text text-transparent">
+                Wikipedia Game Solver
+              </span>
             </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-400">
+            <p className="mt-1 max-w-xl text-sm text-text-muted">
               The{' '}
               <a
                 href="https://en.wikipedia.org/wiki/Wikipedia:Wiki_Game"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent-400 hover:underline"
+                className="text-accent hover:underline"
               >
                 Wikipedia Game
               </a>
@@ -209,6 +213,7 @@ export default function App() {
               greedily follows the best one.
             </p>
           </div>
+          <ThemePicker />
         </div>
       </header>
 
@@ -242,7 +247,7 @@ export default function App() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-ink-700 bg-ink-900/50 p-4 shadow-glow backdrop-blur-sm sm:p-6">
+      <section className="rounded-2xl border border-border bg-surface/50 p-4 shadow-glow backdrop-blur-sm sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex items-end gap-2">
             <div className="min-w-0 flex-1">
@@ -260,7 +265,7 @@ export default function App() {
               aria-label="Pick a random article"
               disabled={running}
               onClick={() => pickRandom('start')}
-              className="mb-0.5 flex-shrink-0 rounded-lg border border-ink-700 bg-ink-800 px-2.5 py-2 text-base leading-none text-slate-300 transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="mb-0.5 flex-shrink-0 rounded-lg border border-border bg-surface px-2.5 py-2 text-base leading-none text-text transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               🎲
             </button>
@@ -281,7 +286,7 @@ export default function App() {
               aria-label="Pick a random article"
               disabled={running}
               onClick={() => pickRandom('end')}
-              className="mb-0.5 flex-shrink-0 rounded-lg border border-ink-700 bg-ink-800 px-2.5 py-2 text-base leading-none text-slate-300 transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="mb-0.5 flex-shrink-0 rounded-lg border border-border bg-surface px-2.5 py-2 text-base leading-none text-text transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               🎲
             </button>
@@ -292,7 +297,7 @@ export default function App() {
             <button
               onClick={run}
               disabled={!start || !end}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm font-semibold text-ink-950 shadow-md shadow-accent-500/30 transition-all hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg shadow-md shadow-accent/30 transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
               Solve
@@ -307,7 +312,7 @@ export default function App() {
             </button>
           )}
 
-          <label className="flex items-center gap-1.5 text-sm text-slate-400">
+          <label className="flex items-center gap-1.5 text-sm text-text-muted">
             Max retries
             <input
               type="number"
@@ -323,21 +328,21 @@ export default function App() {
                 const v = parseInt(e.target.value, 10)
                 if (isNaN(v) || v < 1 || v > 5) setMaxAttempts(3)
               }}
-              className="w-14 rounded-lg border border-ink-700 bg-ink-800 px-2 py-1.5 text-center text-sm font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-accent-500 disabled:cursor-not-allowed disabled:opacity-40"
+              className="w-14 rounded-lg border border-border bg-surface px-2 py-1.5 text-center text-sm font-mono text-text focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-40"
             />
           </label>
 
           <div
             className={`flex min-w-[6rem] items-center justify-center rounded-lg border px-3 py-1.5 font-mono text-2xl font-semibold tabular-nums tracking-tight ${
               running
-                ? 'border-accent-500/40 bg-accent-500/10 text-accent-300'
-                : 'border-ink-700 bg-ink-800 text-slate-300'
+                ? 'border-accent/40 bg-accent/10 text-accent'
+                : 'border-border bg-surface text-text-muted'
             }`}
           >
             {formatElapsed(elapsed, hasRunRef.current)}
           </div>
 
-          <div className="ml-auto grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-400 sm:flex sm:flex-wrap sm:items-center">
+          <div className="ml-auto grid grid-cols-2 gap-2 font-mono text-[11px] text-text-dim sm:flex sm:flex-wrap sm:items-center">
             <Stat label="Hops" value={Math.max(0, path.length - 1).toString()} />
             <Stat label="API calls" value={apiCalls.toString()} />
             <Stat label="Scored" value={candidatesScored.toString()} />
@@ -347,11 +352,11 @@ export default function App() {
         {status && (
           <p
             className={`mt-3 truncate text-sm ${
-              found ? 'text-emerald-300' : running ? 'text-slate-300' : 'text-slate-400'
+              found ? 'text-emerald-300' : running ? 'text-text' : 'text-text-muted'
             }`}
           >
             {running && (
-              <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-accent-500" />
+              <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-accent" />
             )}
             {status}
           </p>
@@ -363,9 +368,9 @@ export default function App() {
         )}
       </section>
 
-      <section className="min-h-[220px] overflow-x-auto rounded-2xl border border-ink-700 bg-ink-900/40 p-3 sm:p-6">
+      <section className="min-h-[220px] overflow-x-auto rounded-2xl border border-border bg-surface/40 p-3 sm:p-6">
         {path.length === 0 ? (
-          <div className="flex min-h-[180px] items-center justify-center text-sm text-slate-500">
+          <div className="flex min-h-[180px] items-center justify-center text-sm text-text-dim">
             {running ? 'Warming up...' : 'The path will appear here as the solver walks.'}
           </div>
         ) : (
@@ -378,30 +383,30 @@ export default function App() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-ink-700 bg-ink-900/40 p-4 sm:p-6">
+      <section className="rounded-2xl border border-border bg-surface/40 p-4 sm:p-6">
         <button
           onClick={() => setLogOpen((v) => !v)}
           className="flex w-full items-center justify-between text-left"
         >
-          <span className="text-sm font-semibold text-slate-200">
-            Trace log <span className="text-slate-500">({log.length} events)</span>
+          <span className="text-sm font-semibold text-text">
+            Trace log <span className="text-text-dim">({log.length} events)</span>
           </span>
-          <span className="text-xs text-slate-500">{logOpen ? 'Hide' : 'Show'}</span>
+          <span className="text-xs text-text-dim">{logOpen ? 'Hide' : 'Show'}</span>
         </button>
         {logOpen && (
-          <ul className="mt-3 max-h-72 space-y-1.5 overflow-y-auto font-mono text-xs text-slate-400">
+          <ul className="mt-3 max-h-72 space-y-1.5 overflow-y-auto font-mono text-xs text-text-muted">
             {log.map((entry, i) => (
               <li key={i} className={entry.kind === 'warn' ? 'text-amber-300' : ''}>
-                <span className="text-slate-600">
+                <span className="text-text-dim">
                   [{((entry.time - (log[0]?.time ?? entry.time)) / 1000).toFixed(2)}s]
                 </span>{' '}
                 {entry.message}
                 {entry.topCandidates && entry.topCandidates.length > 1 && (
-                  <div className="ml-4 mt-0.5 break-words text-slate-500">
+                  <div className="ml-4 mt-0.5 break-words text-text-dim">
                     Top scores:{' '}
                     {entry.topCandidates
                       .map((c) => `${c.title} ${(c.score * 100).toFixed(1)}%`)
-                      .join('  ·  ')}
+                      .join('  .  ')}
                   </div>
                 )}
               </li>
@@ -410,18 +415,18 @@ export default function App() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-ink-700 bg-ink-900/40 p-4 sm:p-6">
-        <h2 className="text-lg font-semibold text-slate-100">How the solver works</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">
+      <section className="rounded-2xl border border-border bg-surface/40 p-4 sm:p-6">
+        <h2 className="text-lg font-semibold text-text">How the solver works</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-muted">
           At every step the solver grabs the current article&apos;s outgoing links, fetches a short
-          intro extract for each candidate (batched via MediaWiki&apos;s <code className="text-slate-300">prop=extracts</code>),
+          intro extract for each candidate (batched via MediaWiki&apos;s <code className="text-text">prop=extracts</code>),
           and builds TF-IDF vectors from the candidate intros plus the target&apos;s intro. It
           scores each candidate by cosine similarity to the target and greedily walks to the best
           unvisited one. Ported from an old personal Python project.
         </p>
       </section>
 
-      <footer className="mt-2 text-center text-xs text-slate-500">
+      <footer className="mt-2 text-center text-xs text-text-dim">
         Built by Jack Homer · data from the public MediaWiki API · no backend, no key
       </footer>
     </div>
@@ -430,9 +435,9 @@ export default function App() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-ink-700 bg-ink-800/70 px-2 py-1">
-      <span className="text-slate-500">{label}</span>
-      <span className="text-slate-200">{value}</span>
+    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface/70 px-2 py-1">
+      <span className="text-text-dim">{label}</span>
+      <span className="text-text">{value}</span>
     </span>
   )
 }

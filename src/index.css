@@ -1,3 +1,5 @@
+@import './themes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,18 +12,21 @@
   }
 
   body {
-    @apply bg-ink-950 text-slate-200 font-sans antialiased;
+    @apply font-sans antialiased;
+    background-color: var(--bg);
+    color: var(--text);
     background-image:
-      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(56, 189, 248, 0.18), transparent 60%),
-      radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168, 85, 247, 0.12), transparent 60%),
-      radial-gradient(ellipse 70% 60% at 50% 110%, rgba(14, 165, 233, 0.1), transparent 60%);
+      radial-gradient(ellipse 80% 50% at 20% -10%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 10%, color-mix(in srgb, var(--accent-3) 10%, transparent), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 50% 110%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 60%);
     background-attachment: fixed;
   }
 
   h1,
   h2,
   h3 {
-    @apply font-display text-slate-50;
+    @apply font-display;
+    color: var(--text);
   }
 }
 

@@ -67,7 +67,7 @@ export function Autocomplete({ id, label, placeholder, value, onChange, onSelect
 
   return (
     <div ref={wrapRef} className="relative">
-      <label htmlFor={id} className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+      <label htmlFor={id} className="mb-1 block text-xs font-semibold uppercase tracking-wider text-text-muted">
         {label}
       </label>
       <input
@@ -94,11 +94,11 @@ export function Autocomplete({ id, label, placeholder, value, onChange, onSelect
             setOpen(false)
           }
         }}
-        className="w-full rounded-lg border border-ink-700 bg-ink-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition-colors placeholder:text-slate-500 focus:border-accent-500"
+        className="w-full rounded-lg border border-border bg-bg/80 px-3 py-2.5 text-sm text-text outline-none ring-0 transition-colors placeholder:text-text-dim focus:border-accent"
       />
       {open && suggestions.length > 0 && (
         <ul
-          className="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-72 overflow-y-auto rounded-lg border border-ink-700 bg-ink-900/95 p-1 shadow-xl shadow-black/40 backdrop-blur-sm"
+          className="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-72 overflow-y-auto rounded-lg border border-border bg-bg/95 p-1 shadow-xl shadow-black/40 backdrop-blur-sm"
           role="listbox"
         >
           {suggestions.map((s, i) => (
@@ -109,15 +109,15 @@ export function Autocomplete({ id, label, placeholder, value, onChange, onSelect
                 onClick={() => select(s)}
                 className={`flex w-full flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors ${
                   i === highlight
-                    ? 'bg-accent-500/15 text-slate-100'
-                    : 'text-slate-300 hover:bg-ink-800'
+                    ? 'bg-accent/15 text-text'
+                    : 'text-text-muted hover:bg-surface'
                 }`}
                 role="option"
                 aria-selected={i === highlight}
               >
                 <span className="font-medium">{s.title}</span>
                 {s.description && (
-                  <span className="line-clamp-1 text-xs text-slate-500">{s.description}</span>
+                  <span className="line-clamp-1 text-xs text-text-dim">{s.description}</span>
                 )}
               </button>
             </li>

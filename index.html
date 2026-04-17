@@ -18,6 +18,13 @@
     />
   </head>
   <body>
+    <script>
+      (function () {
+        var stored = localStorage.getItem('site-theme')
+        var valid = ['mocha', 'tokyo-night', 'dracula', 'nord']
+        document.documentElement.dataset.theme = (stored && valid.indexOf(stored) !== -1) ? stored : 'mocha'
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
