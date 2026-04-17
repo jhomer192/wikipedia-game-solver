@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
 const THEMES = [
-  { id: 'mocha', label: 'Mocha', color: '#cba6f7' },
-  { id: 'tokyo-night', label: 'Tokyo Night', color: '#7aa2f7' },
-  { id: 'dracula', label: 'Dracula', color: '#bd93f9' },
-  { id: 'nord', label: 'Nord', color: '#88c0d0' },
+  { id: 'mocha', label: 'Mocha', color: '#f5c2e7' },
+  { id: 'tokyo-night', label: 'Tokyo Night', color: '#73daca' },
+  { id: 'miami', label: 'Miami', color: '#ff2d95' },
+  { id: 'forest', label: 'Forest', color: '#8fbc6a' },
 ] as const
 
 type ThemeId = (typeof THEMES)[number]['id']
