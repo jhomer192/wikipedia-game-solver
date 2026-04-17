@@ -240,7 +240,7 @@ export async function* solve(
           const words = tokenize(title)
           const overlapCount = words.filter((w) => recentWords.has(w)).length
           const overlapRatio = words.length > 0 ? overlapCount / words.length : 0
-          const noveltyPenalty = -0.3 * overlapRatio
+          const noveltyPenalty = -1.5 * overlapRatio
           const hubBonus = 0.1 * Math.max(0, 1 - title.length / 40)
           // Use actual page byte size as hub signal (bigger article = more outgoing links)
           const pageSize = pageSizes.get(title) ?? 0
