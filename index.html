@@ -17,12 +17,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap"
     />
     <script>
-      (function () {
-        var old = ['mocha', 'tokyo-night', 'dracula', 'nord', 'forest'];
-        var stored = localStorage.getItem('site-theme');
-        document.documentElement.dataset.theme = (stored && old.indexOf(stored) === -1) ? stored : 'tokyo';
-      })()
-    </script>
+(function(){var s=localStorage.getItem('site-theme');if(s)document.documentElement.setAttribute('data-theme',s)})();
+</script>
   </head>
   <body>
     <div id="root"></div>

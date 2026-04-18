@@ -85,7 +85,8 @@ export async function* solve(
   // Build enriched target tokens from both title and intro for better signal
   // on niche articles where the title alone is a single opaque token
   const endIntroTokens = new Set(tokenize(endIntro))
-  const endAllTokens = new Set([...endTitleTokens, ...endIntroTokens])
+  // Merge title + intro tokens for broader matching
+  endIntroTokens.forEach((t) => endTitleTokens.add(t))
 
   const startLinksResult = await getLinks(start, 500, signal)
   apiCalls += startLinksResult.calls

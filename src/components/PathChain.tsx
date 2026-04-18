@@ -158,7 +158,7 @@ function Arrow({ horizontal = false }: { horizontal?: boolean }) {
         <svg width="34" height="18" viewBox="0 0 34 18" fill="none">
           <defs>
             <linearGradient id="arrowGradH" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="var(--border-strong)" />
+              <stop offset="0%" stopColor="var(--border)" />
               <stop offset="100%" stopColor="var(--accent)" />
             </linearGradient>
           </defs>
@@ -174,7 +174,7 @@ function Arrow({ horizontal = false }: { horizontal?: boolean }) {
       <svg width="18" height="34" viewBox="0 0 18 34" fill="none">
         <defs>
           <linearGradient id="arrowGradV" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--border-strong)" />
+            <stop offset="0%" stopColor="var(--border)" />
             <stop offset="100%" stopColor="var(--accent)" />
           </linearGradient>
         </defs>
@@ -191,7 +191,7 @@ function DownArrow() {
       <svg width="18" height="34" viewBox="0 0 18 34" fill="none">
         <defs>
           <linearGradient id="arrowGradDown" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--border-strong)" />
+            <stop offset="0%" stopColor="var(--border)" />
             <stop offset="100%" stopColor="var(--accent)" />
           </linearGradient>
         </defs>
