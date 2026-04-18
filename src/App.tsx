@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Autocomplete } from './components/Autocomplete'
+import { DailyChallenge } from './components/DailyChallenge'
 import { PathChain } from './components/PathChain'
 import { ThemePicker } from './components/ThemePicker'
 import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
 import { getRandomArticle, subscribeRateLimit } from './lib/wiki'
+import { getSavedResult, getDailyStats, todayLocal } from './lib/daily'
 
 function formatElapsed(seconds: number, hasRun: boolean): string {
   if (!hasRun) return '--'
@@ -22,7 +24,10 @@ interface LogEntry {
   topCandidates?: TopCandidate[]
 }
 
+type Tab = 'daily' | 'solver'
+
 export default function App() {
+  const [tab, setTab] = useState<Tab>('daily')
   const [start, setStart] = useState('Dog')
   const [end, setEnd] = useState('Albert Einstein')
   const [maxAttempts, setMaxAttempts] = useState(3)
@@ -186,6 +191,10 @@ export default function App() {
 
   const currentIndex = path.length - 1
 
+  const dailyResult = getSavedResult(todayLocal())
+  const dailyStatsData = getDailyStats()
+  const dailyCompleted = !!dailyResult?.completed
+
   return (
     <div className="mx-auto flex min-h-screen max-w-[1400px] flex-col gap-5 px-3 py-6 sm:gap-6 sm:px-8 sm:py-8">
       <header>
@@ -215,8 +224,51 @@ export default function App() {
           </div>
           <ThemePicker />
         </div>
+
+        {/* Tab bar */}
+        <div className="mt-4 flex gap-1 rounded-xl border border-border bg-surface/30 p-1">
+          <button
+            onClick={() => setTab('daily')}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
+              tab === 'daily'
+                ? 'bg-accent/15 text-accent shadow-sm'
+                : 'text-text-muted hover:bg-surface-hover hover:text-text'
+            }`}
+          >
+            <span className="text-base">📅</span>
+            Daily Challenge
+            {dailyStatsData.currentStreak > 0 && (
+              <span className="rounded-full bg-accent/20 px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                🔥 {dailyStatsData.currentStreak}
+              </span>
+            )}
+            {dailyCompleted && (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-emerald-400">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => setTab('solver')}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
+              tab === 'solver'
+                ? 'bg-accent/15 text-accent shadow-sm'
+                : 'text-text-muted hover:bg-surface-hover hover:text-text'
+            }`}
+          >
+            <span className="text-base">🔍</span>
+            Free Solver
+          </button>
+        </div>
       </header>
 
+      {tab === 'daily' && (
+        <section className="rounded-2xl border border-border bg-surface/50 p-4 shadow-glow backdrop-blur-sm sm:p-6">
+          <DailyChallenge />
+        </section>
+      )}
+
+      {tab === 'solver' && <>
       {rateLimited && (
         <div className="flex items-start justify-between gap-3 rounded-xl border border-amber-700/50 bg-amber-900/30 px-4 py-3 text-sm text-amber-200">
           <div>
@@ -414,6 +466,7 @@ export default function App() {
           </ul>
         )}
       </section>
+      </>}
 
       <section className="rounded-2xl border border-border bg-surface/40 p-4 sm:p-6">
         <h2 className="text-lg font-semibold text-text">How the solver works</h2>
