@@ -82,6 +82,10 @@ export async function* solve(
   const backlinks = new Set(backlinksResult.titles)
 
   const endTitleTokens = new Set(tokenize(end))
+  // Build enriched target tokens from both title and intro for better signal
+  // on niche articles where the title alone is a single opaque token
+  const endIntroTokens = new Set(tokenize(endIntro))
+  const endAllTokens = new Set([...endTitleTokens, ...endIntroTokens])
 
   const startLinksResult = await getLinks(start, 500, signal)
   apiCalls += startLinksResult.calls
@@ -189,26 +193,49 @@ export async function* solve(
       const cosineScores = scoreCandidates(texts, endIntro)
       candidatesScored += candidates.length
 
+      // Detect if the target is "niche" (cosine scores are all near zero)
+      const maxCosine = Math.max(...cosineScores, 0)
+      const isNicheTarget = maxCosine < 0.03
+
       const boosted = candidates.map((title, i) => {
         const candTokens = new Set(tokenize(title))
-        let overlap = 0
-        for (const t of candTokens) if (endTitleTokens.has(t)) overlap += 1
-        const denom = Math.max(endTitleTokens.size, 1)
-        const boost = titleBoostWeight * (overlap / denom)
+        // Title-word overlap with target title
+        let titleOverlap = 0
+        for (const t of candTokens) if (endTitleTokens.has(t)) titleOverlap += 1
+        const titleDenom = Math.max(endTitleTokens.size, 1)
+        const titleBoost = titleBoostWeight * (titleOverlap / titleDenom)
+
+        // Intro-word overlap: check if candidate title words appear in the target's intro
+        // This helps when the target title is opaque (e.g., "WolfeyVGC") but its intro
+        // mentions "Pokemon", "Video Game Championships", "esports", etc.
+        let introOverlap = 0
+        for (const t of candTokens) if (endIntroTokens.has(t)) introOverlap += 1
+        const introDenom = Math.max(endIntroTokens.size, 1)
+        const introBoost = 0.15 * (introOverlap / introDenom)
+
         // Hub bias: shorter titles tend to be broader hub articles; long titles
         // are often narrow disambiguation or "2003 X season" articles.
-        const lengthBias = titleLengthBoostWeight * Math.max(0, 1 - title.length / 50)
-        return { title, score: cosineScores[i] + boost + lengthBias }
+        let lengthBias = titleLengthBoostWeight * Math.max(0, 1 - title.length / 50)
+
+        // When the target is niche and we have no cosine signal, heavily favor
+        // big hub articles that are more likely to bridge to different domains
+        if (isNicheTarget) {
+          const pageSize = pageSizes.get(title) ?? 0
+          const hubBoost = pageSize > 0 ? 0.05 * Math.max(0, Math.log(pageSize / 5000) / Math.log(16)) : 0
+          lengthBias += hubBoost
+        }
+
+        return { title, score: cosineScores[i] + titleBoost + introBoost + lengthBias }
       })
 
       const scored = boosted.sort((a, b) => b.score - a.score)
 
-      // Detect year-variant loops: "2019 X season", "2020 X season", "2018 X season"
+      // Detect year-variant loops: "2019 X season", "2020 X season"
       // Strip 4-digit years from recent titles and check if they collapse to the same string
       const stripYears = (s: string) => s.replace(/\b\d{4}\b/g, '').replace(/\s+/g, ' ').trim()
       const isYearLoop =
-        recentTitles.length >= 3 &&
-        new Set(recentTitles.slice(-3).map(stripYears)).size === 1
+        recentTitles.length >= 2 &&
+        new Set(recentTitles.slice(-2).map(stripYears)).size === 1
 
       const isFlat =
         scored.length >= 3 &&
