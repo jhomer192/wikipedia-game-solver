@@ -4,6 +4,7 @@ import { DailyChallenge } from './components/DailyChallenge'
 import { PathChain } from './components/PathChain'
 import { ThemePicker } from './components/ThemePicker'
 import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
+import { bfsShortestPath } from './lib/bfs'
 import { getRandomArticle, subscribeRateLimit } from './lib/wiki'
 import { getSavedResult, getDailyStats, todayLocal } from './lib/daily'
 
@@ -25,12 +26,15 @@ interface LogEntry {
 }
 
 type Tab = 'daily' | 'solver'
+type SolverMode = 'greedy' | 'shortest'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('daily')
   const [start, setStart] = useState('Dog')
   const [end, setEnd] = useState('Albert Einstein')
+  const [mode, setMode] = useState<SolverMode>('greedy')
   const [maxAttempts, setMaxAttempts] = useState(3)
+  const [bfsMaxDepth, setBfsMaxDepth] = useState(4)
   const [running, setRunning] = useState(false)
   const [path, setPath] = useState<VisitedStep[]>([])
   const [found, setFound] = useState(false)
@@ -114,49 +118,87 @@ export default function App() {
     abortRef.current = c
 
     try {
-      for await (const ev of solve({ start: start.trim(), end: end.trim(), maxAttempts, signal: c.signal })) {
-        if (c.signal.aborted) break
-        if (ev.type === 'status') {
-          setStatus(ev.message)
-          setLog((l) => [...l, { time: performance.now(), message: ev.message, kind: 'info' }])
-        } else if (ev.type === 'step') {
-          setPath((p) => [...p, ev.step])
-          setLog((l) => [
-            ...l,
-            {
-              time: performance.now(),
-              message: `-> ${ev.step.title}  (${(ev.step.similarity * 100).toFixed(2)}%)`,
-              kind: 'info',
-              topCandidates: ev.topCandidates,
-            },
-          ])
-        } else if (ev.type === 'found') {
-          setPath((p) => [...p, ev.step])
-          setFound(true)
-          setStatus(`Found "${ev.step.title}"!`)
-          setLog((l) => [
-            ...l,
-            { time: performance.now(), message: `Reached target.`, kind: 'info' },
-          ])
-        } else if (ev.type === 'stuck') {
-          setError(ev.reason)
-          setStatus('')
-          setPath((p) => {
-            const best = p.length > 0 ? p : lastAttemptRef.current
-            return best
-          })
-          setLog((l) => [...l, { time: performance.now(), message: ev.reason, kind: 'warn' }])
-        } else if (ev.type === 'restart') {
-          setPath((p) => {
-            lastAttemptRef.current = p
-            return []
-          })
-          const msg = `Retrying from "${start.trim()}" with a different route (attempt ${ev.attempt + 1})`
-          setStatus(msg)
-          setLog((l) => [...l, { time: performance.now(), message: msg, kind: 'warn' }])
-        } else if (ev.type === 'stats') {
-          setApiCalls(ev.apiCalls)
-          setCandidatesScored(ev.candidatesScored)
+      if (mode === 'shortest') {
+        // Bidirectional BFS path. The result is an array of page titles; we
+        // convert to VisitedStep[] so the existing PathChain UI renders it.
+        for await (const ev of bfsShortestPath({
+          start: start.trim(),
+          end: end.trim(),
+          maxDepth: bfsMaxDepth,
+          signal: c.signal,
+        })) {
+          if (c.signal.aborted) break
+          if (ev.type === 'status' || ev.type === 'progress') {
+            if (ev.message) {
+              setStatus(ev.message)
+              setLog((l) => [...l, { time: performance.now(), message: ev.message!, kind: 'info' }])
+            }
+          } else if (ev.type === 'stats') {
+            if (ev.apiCalls != null) setApiCalls(ev.apiCalls)
+            if (ev.nodesExplored != null) setCandidatesScored(ev.nodesExplored)
+          } else if (ev.type === 'found' && ev.path) {
+            const steps: VisitedStep[] = ev.path.map((title, i) => ({
+              index: i,
+              title,
+              intro: '',
+              similarity: 1,
+              outgoingLinks: 0,
+            }))
+            setPath(steps)
+            setFound(true)
+            setStatus(`Shortest path found in ${ev.path.length - 1} hop${ev.path.length - 1 !== 1 ? 's' : ''}.`)
+            setLog((l) => [...l, { time: performance.now(), message: `Reached target in ${ev.path!.length - 1} hops.`, kind: 'info' }])
+          } else if (ev.type === 'not_found') {
+            setError(ev.message ?? 'No path found.')
+            setStatus('')
+            setLog((l) => [...l, { time: performance.now(), message: ev.message ?? 'No path.', kind: 'warn' }])
+          }
+        }
+      } else {
+        for await (const ev of solve({ start: start.trim(), end: end.trim(), maxAttempts, signal: c.signal })) {
+          if (c.signal.aborted) break
+          if (ev.type === 'status') {
+            setStatus(ev.message)
+            setLog((l) => [...l, { time: performance.now(), message: ev.message, kind: 'info' }])
+          } else if (ev.type === 'step') {
+            setPath((p) => [...p, ev.step])
+            setLog((l) => [
+              ...l,
+              {
+                time: performance.now(),
+                message: `-> ${ev.step.title}  (${(ev.step.similarity * 100).toFixed(2)}%)`,
+                kind: 'info',
+                topCandidates: ev.topCandidates,
+              },
+            ])
+          } else if (ev.type === 'found') {
+            setPath((p) => [...p, ev.step])
+            setFound(true)
+            setStatus(`Found "${ev.step.title}"!`)
+            setLog((l) => [
+              ...l,
+              { time: performance.now(), message: `Reached target.`, kind: 'info' },
+            ])
+          } else if (ev.type === 'stuck') {
+            setError(ev.reason)
+            setStatus('')
+            setPath((p) => {
+              const best = p.length > 0 ? p : lastAttemptRef.current
+              return best
+            })
+            setLog((l) => [...l, { time: performance.now(), message: ev.reason, kind: 'warn' }])
+          } else if (ev.type === 'restart') {
+            setPath((p) => {
+              lastAttemptRef.current = p
+              return []
+            })
+            const msg = `Retrying from "${start.trim()}" with a different route (attempt ${ev.attempt + 1})`
+            setStatus(msg)
+            setLog((l) => [...l, { time: performance.now(), message: msg, kind: 'warn' }])
+          } else if (ev.type === 'stats') {
+            setApiCalls(ev.apiCalls)
+            setCandidatesScored(ev.candidatesScored)
+          }
         }
       }
     } catch (e) {
@@ -168,7 +210,7 @@ export default function App() {
       setRunning(false)
       stopElapsed()
     }
-  }, [start, end, maxAttempts])
+  }, [start, end, maxAttempts, mode, bfsMaxDepth])
 
   const pickRandom = async (which: 'start' | 'end') => {
     try {
@@ -364,25 +406,77 @@ export default function App() {
             </button>
           )}
 
-          <label className="flex items-center gap-1.5 text-sm text-text-muted">
-            Max retries
-            <input
-              type="number"
-              min={1}
-              max={5}
+          {/* Mode toggle */}
+          <div className="inline-flex items-center gap-0 overflow-hidden rounded-lg border border-border text-xs font-semibold">
+            <button
+              type="button"
               disabled={running}
-              value={maxAttempts}
-              onChange={(e) => {
-                const v = parseInt(e.target.value, 10)
-                if (!isNaN(v)) setMaxAttempts(Math.min(5, Math.max(1, v)))
-              }}
-              onBlur={(e) => {
-                const v = parseInt(e.target.value, 10)
-                if (isNaN(v) || v < 1 || v > 5) setMaxAttempts(3)
-              }}
-              className="w-14 rounded-lg border border-border bg-surface px-2 py-1.5 text-center text-sm font-mono text-text focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-40"
-            />
-          </label>
+              onClick={() => setMode('greedy')}
+              title="Greedy TF-IDF walker - fast, but not guaranteed shortest"
+              className={`px-3 py-1.5 transition-colors ${
+                mode === 'greedy'
+                  ? 'bg-accent/20 text-accent'
+                  : 'bg-surface text-text-muted hover:bg-surface-hover'
+              } disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              Greedy
+            </button>
+            <button
+              type="button"
+              disabled={running}
+              onClick={() => setMode('shortest')}
+              title="Bidirectional BFS - finds the true shortest path within the depth cap"
+              className={`px-3 py-1.5 transition-colors ${
+                mode === 'shortest'
+                  ? 'bg-accent/20 text-accent'
+                  : 'bg-surface text-text-muted hover:bg-surface-hover'
+              } disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              Shortest
+            </button>
+          </div>
+
+          {mode === 'greedy' ? (
+            <label className="flex items-center gap-1.5 text-sm text-text-muted">
+              Max retries
+              <input
+                type="number"
+                min={1}
+                max={5}
+                disabled={running}
+                value={maxAttempts}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10)
+                  if (!isNaN(v)) setMaxAttempts(Math.min(5, Math.max(1, v)))
+                }}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10)
+                  if (isNaN(v) || v < 1 || v > 5) setMaxAttempts(3)
+                }}
+                className="w-14 rounded-lg border border-border bg-surface px-2 py-1.5 text-center text-sm font-mono text-text focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-40"
+              />
+            </label>
+          ) : (
+            <label className="flex items-center gap-1.5 text-sm text-text-muted">
+              Max hops
+              <input
+                type="number"
+                min={2}
+                max={6}
+                disabled={running}
+                value={bfsMaxDepth}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10)
+                  if (!isNaN(v)) setBfsMaxDepth(Math.min(6, Math.max(2, v)))
+                }}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10)
+                  if (isNaN(v) || v < 2 || v > 6) setBfsMaxDepth(4)
+                }}
+                className="w-14 rounded-lg border border-border bg-surface px-2 py-1.5 text-center text-sm font-mono text-text focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-40"
+              />
+            </label>
+          )}
 
           <div
             className={`flex min-w-[6rem] items-center justify-center rounded-lg border px-3 py-1.5 font-mono text-2xl font-semibold tabular-nums tracking-tight ${
@@ -400,6 +494,24 @@ export default function App() {
             <Stat label="Scored" value={candidatesScored.toString()} />
           </div>
         </div>
+
+        {/* Mode disclaimer */}
+        <p className="mt-3 rounded-md border border-border/60 bg-surface/50 px-3 py-2 text-xs text-text-muted">
+          {mode === 'greedy' ? (
+            <>
+              <span className="font-semibold text-text">Greedy mode:</span> a TF-IDF walker that
+              follows the most semantically relevant link at each step. Fast, but the path it
+              returns is <span className="font-semibold">not guaranteed to be the shortest</span>.
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-text">Shortest-path mode:</span> bidirectional BFS
+              over the Wikipedia link graph. Guarantees the shortest path it finds is truly
+              shortest, but is limited to the max-hops depth cap. Can be slow or rate-limited on
+              popular hub pages -- try narrowing to specific starts/ends.
+            </>
+          )}
+        </p>
 
         {status && (
           <p
@@ -470,13 +582,25 @@ export default function App() {
 
       <section className="rounded-2xl border border-border bg-surface/40 p-4 sm:p-6">
         <h2 className="text-lg font-semibold text-text">How the solver works</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-muted">
-          At every step the solver grabs the current article&apos;s outgoing links, fetches a short
-          intro extract for each candidate (batched via MediaWiki&apos;s <code className="text-text">prop=extracts</code>),
-          and builds TF-IDF vectors from the candidate intros plus the target&apos;s intro. It
-          scores each candidate by cosine similarity to the target and greedily walks to the best
-          unvisited one. Ported from an old personal Python project.
-        </p>
+        <div className="mt-2 max-w-3xl space-y-3 text-sm leading-relaxed text-text-muted">
+          <p>
+            <span className="font-semibold text-text">Greedy (default).</span> At every step the
+            walker grabs the current article&apos;s outgoing links, fetches a short intro extract
+            for each candidate (batched via MediaWiki&apos;s{' '}
+            <code className="text-text">prop=extracts</code>), and builds TF-IDF vectors from the
+            candidate intros plus the target&apos;s intro. It scores each candidate by cosine
+            similarity to the target and greedily walks to the best unvisited one. Fast and cheap,
+            but offers <em>no guarantee</em> that the path it returns is the shortest.
+          </p>
+          <p>
+            <span className="font-semibold text-text">Shortest path.</span> Runs a bidirectional
+            breadth-first search over the Wikipedia link graph -- expanding outgoing links forward
+            from the start and backlinks backward from the end, one level at a time, until the two
+            frontiers meet. The path it reports is guaranteed to be the shortest <em>within</em>{' '}
+            the configured max-hops depth cap. Heavier on API calls, so rate-limit-friendly caps
+            apply.
+          </p>
+        </div>
       </section>
 
       <footer className="mt-2 text-center text-xs text-text-dim">
