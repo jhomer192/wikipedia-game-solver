@@ -7,6 +7,7 @@ import { solve, type VisitedStep, type TopCandidate } from './lib/solver'
 import { bfsShortestPath } from './lib/bfs'
 import { getRandomArticle, subscribeRateLimit } from './lib/wiki'
 import { getSavedResult, getDailyStats, todayLocal } from './lib/daily'
+import { track } from './lib/analytics'
 
 function formatElapsed(seconds: number, hasRun: boolean): string {
   if (!hasRun) return '--'
@@ -112,6 +113,10 @@ export default function App() {
       return
     }
     reset()
+    // The only action on this page that counts as use. Article titles are
+    // deliberately not sent — the question is whether anyone ran it, not what
+    // they looked up.
+    track('solve-run', { mode })
     setRunning(true)
     startElapsed()
     const c = new AbortController()
@@ -137,6 +142,7 @@ export default function App() {
             if (ev.apiCalls != null) setApiCalls(ev.apiCalls)
             if (ev.nodesExplored != null) setCandidatesScored(ev.nodesExplored)
           } else if (ev.type === 'found' && ev.path) {
+            track('solve-found', { mode: 'shortest', hops: ev.path.length - 1 })
             const steps: VisitedStep[] = ev.path.map((title, i) => ({
               index: i,
               title,
@@ -172,6 +178,7 @@ export default function App() {
               },
             ])
           } else if (ev.type === 'found') {
+            track('solve-found', { mode: 'greedy' })
             setPath((p) => [...p, ev.step])
             setFound(true)
             setStatus(`Found "${ev.step.title}"!`)
