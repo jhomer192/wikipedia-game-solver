@@ -250,7 +250,7 @@ export default function App() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="flex items-center gap-3 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-              <img src="/logo.svg" alt="Wikipedia Game Solver logo" className="h-8 w-8 sm:h-10 sm:w-10" />
+              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Wikipedia Game Solver logo" className="h-8 w-8 sm:h-10 sm:w-10" />
               <span className="bg-gradient-to-r from-accent via-accent-2 to-accent-3 bg-clip-text text-transparent">
                 Wikipedia Game Solver
               </span>
