@@ -22,7 +22,7 @@ A bidirectional breadth-first search instead: outgoing links forward from the st
 
 A live count of hops, API calls and candidates scored. A chain of cards for the path so far, each showing the article's intro, its outgoing link count, and its similarity score. And a trace log of every status message plus the top-scoring candidates considered at each step, which is the part worth reading when it makes a strange jump.
 
-There's also a daily challenge: 369 curated article pairs, one per day, graded easy, medium or hard. Solving one records hops and time, and the app keeps a streak, an average, and a histogram of hop counts, with a copyable result line.
+There's also a daily challenge: 368 curated article pairs, one per day, graded easy, medium or hard. Solving one records hops and time, and the app keeps a streak, an average, and a histogram of hop counts, with a copyable result line.
 
 Rate limits and flaky requests are handled. A 429 surfaces a countdown in the UI, and 5xx responses or dropped connections get one automatic retry with backoff.
 
