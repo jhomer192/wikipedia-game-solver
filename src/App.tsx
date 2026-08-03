@@ -616,7 +616,7 @@ export default function App() {
           Jack Homer
         </a>
         {' · '}
-        <a href="https://jackhomer.com/projects/wikigame/" className="underline hover:text-text">
+        <a href="https://jackhomer.com/projects/wikipedia-game-solver/" className="underline hover:text-text">
           Project write-up
         </a>
         {' · '}
