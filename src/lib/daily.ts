@@ -2,7 +2,7 @@
  * Daily Challenge system -- deterministic challenge-per-day, Wordle-style.
  *
  * Challenge #1 starts on 2026-04-19 (launch date).
- * The challenge list wraps every 365 entries.
+ * The challenge list wraps every 368 entries.
  */
 
 export interface DailyChallenge {
@@ -33,7 +33,7 @@ export interface DailyStats {
 
 const LAUNCH_DATE = '2026-04-19'
 
-/** 365 curated article pairs, mixing difficulties. */
+/** 368 curated article pairs, mixing difficulties. */
 const CHALLENGES: { start: string; end: string; difficulty: 'easy' | 'medium' | 'hard' }[] = [
   // --- Easy (approx 120) ---
   { start: 'Dog', end: 'Cat', difficulty: 'easy' },
