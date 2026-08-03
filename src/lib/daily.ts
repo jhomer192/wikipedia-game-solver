@@ -553,6 +553,6 @@ export function buildShareText(result: DailyResult, challenge: DailyChallenge): 
     `${challenge.start} \u2192 ${challenge.end}`,
     `${result.hops} hops in ${time}`,
     squares,
-    'jhomer192.github.io/wikipedia-game-solver',
+    'jackhomer.com/wikipedia-game-solver/',
   ].join('\n')
 }

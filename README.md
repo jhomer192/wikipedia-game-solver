@@ -1,6 +1,6 @@
 # Wikipedia Game Solver
 
-Live: <https://jhomer192.github.io/wikipedia-game-solver/>
+Live: <https://jackhomer.com/wikipedia-game-solver/>
 
 A browser app that plays the Wikipedia Game: given a start article and a goal
 article, it follows the hyperlinks inside each article, using TF-IDF + cosine

@@ -611,7 +611,16 @@ export default function App() {
       </section>
 
       <footer className="mt-2 text-center text-xs text-text-dim">
-        Built by Jack Homer · data from the public MediaWiki API · no backend, no key
+        Built by{' '}
+        <a href="https://jackhomer.com" className="underline hover:text-text">
+          Jack Homer
+        </a>
+        {' · '}
+        <a href="https://jackhomer.com/projects/wikigame/" className="underline hover:text-text">
+          Project write-up
+        </a>
+        {' · '}
+        data from the public MediaWiki API · no backend, no key
       </footer>
     </div>
   )
