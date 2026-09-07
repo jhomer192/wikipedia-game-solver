@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Outer circle -->
+  <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2.5" fill="none" opacity="0.3"/>
+  <!-- Bold W letterform -->
+  <path d="M10 14 L15 34 L24 20 L33 34 L38 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Path dots connecting nodes (game path motif) -->
+  <circle cx="10" cy="14" r="2.5" fill="currentColor"/>
+  <circle cx="38" cy="14" r="2.5" fill="currentColor"/>
+  <circle cx="24" cy="20" r="2.5" fill="currentColor"/>
+  <!-- Tiny connecting arrow at bottom right -->
+  <path d="M34 36 L42 36 M39 33 L42 36 L39 39" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+</svg>
