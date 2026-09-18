@@ -60,3 +60,5 @@ Disambiguation pages get no special handling, so a hop through one wastes a step
 React 19, TypeScript, Vite, Tailwind, Vitest. Every request goes to `https://en.wikipedia.org/w/api.php` with `origin=*` for CORS.
 
 If you'd rather play the game than watch a program play it, [wikigame](https://github.com/jhomer192/wikigame) is the human version, with a daily challenge and this solver running in the background to set your par. There's a longer write-up at [jackhomer.com/projects/wikipedia-game-solver](https://jackhomer.com/projects/wikipedia-game-solver/).
+
+A project by [Jack Homer](https://jackhomer.com/).
